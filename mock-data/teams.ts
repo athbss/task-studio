@@ -1,4 +1,4 @@
-import { Project, projects } from './projects';
+import { Project, projects as defaultProjects } from './projects';
 import { User, users } from './users';
 
 export interface Team {
@@ -11,14 +11,20 @@ export interface Team {
    projects: Project[];
 }
 
-export const teams: Team[] = [
-   {
-      id: 'CLAUDE',
-      name: 'Claude',
-      icon: '🤖',
-      joined: true,
-      color: '#8B5CF6',
-      members: users,
-      projects: projects,
-   },
-];
+// Function to create teams with dynamic projects
+export function createTeamsWithProjects(projects: Project[]): Team[] {
+   return [
+      {
+         id: 'TASKMASTER',
+         name: 'Taskmaster',
+         icon: '📋',
+         joined: true,
+         color: '#8B5CF6',
+         members: users,
+         projects: projects.length > 0 ? projects : defaultProjects,
+      },
+   ];
+}
+
+// Default teams for fallback
+export const teams: Team[] = createTeamsWithProjects(defaultProjects);

@@ -224,5 +224,124 @@
          "updated": "2025-06-29T12:05:56.791Z",
          "description": "Tasks for taskmaster-circle-ui context"
       }
+   },
+   "issue-viewer": {
+      "tasks": [
+         {
+            "id": 1,
+            "title": "Create Issue View Zustand Store",
+            "description": "Set up dedicated Zustand store for managing issue viewer modal state including open/close state and selected task ID",
+            "details": "Create src/stores/useIssueViewStore.ts with IssueViewState interface. Include selectedIssueId (string | null), isOpen (boolean), openIssue(issueId: string) action, and closeIssue() action. Use Zustand's create function with proper TypeScript typing. Store should be minimal and focused only on modal state management.",
+            "testStrategy": "Manual testing of store actions - verify openIssue sets selectedIssueId and isOpen to true, closeIssue resets selectedIssueId to null and isOpen to false. Test store subscription updates in React components.",
+            "priority": "high",
+            "dependencies": [],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 2,
+            "title": "Build IssueViewModal Wrapper Component",
+            "description": "Create main modal component that wraps task details using existing shadcn/ui Dialog component with proper modal behaviors",
+            "details": "Create src/components/IssueViewModal.tsx using Dialog, DialogOverlay, and DialogContent from shadcn/ui. Connect to useIssueViewStore for open/close state. Implement keyboard shortcuts (ESC to close), overlay click to close, and X button. Use proper focus management and modal accessibility patterns. Component should be conditionally rendered based on isOpen state.",
+            "testStrategy": "Manual testing of modal open/close behaviors - ESC key, overlay click, X button. Verify focus management and that modal doesn't interfere with existing UI. Test keyboard accessibility and screen reader compatibility.",
+            "priority": "high",
+            "dependencies": [1],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 3,
+            "title": "Create TaskDetailsView Content Component",
+            "description": "Build component that displays all task information in a structured, readable layout within the modal",
+            "details": "Create src/components/TaskDetailsView.tsx that receives TaskmasterTask as props. Layout includes: DialogHeader with task title and close button, status & priority badges, description section, details section, test strategy section, metadata (dates, assignee), and labels. Use existing component patterns and typography. Structure content in logical sections with proper spacing.",
+            "testStrategy": "Test with various task data structures including tasks with and without optional fields (assignee, labels, dueDate, details, testStrategy). Verify proper text formatting and responsive layout on different screen sizes.",
+            "priority": "medium",
+            "dependencies": [2],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 4,
+            "title": "Implement Task Data Retrieval Logic",
+            "description": "Add logic to find and retrieve selected task data from existing task lists without additional API calls",
+            "details": "Add task lookup functionality that finds TaskmasterTask by ID from existing data sources. Create utility function in TaskDetailsView or custom hook that accesses current task data (from context, props, or parent component state). Handle cases where task ID doesn't exist. Use simple Array.find() for MVP, can optimize with Map lookup later if needed.",
+            "testStrategy": "Test task lookup with valid and invalid task IDs. Verify that modal displays correct task data and handles missing tasks gracefully. Test with different data sources (list view, board view) to ensure consistent data access.",
+            "priority": "medium",
+            "dependencies": [3],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 5,
+            "title": "Add Click Handlers to IssueLine Component",
+            "description": "Modify existing IssueLine component to open issue viewer modal when clicked",
+            "details": "Update src/components/IssueLine.tsx (or equivalent) to add onClick handler that calls useIssueViewStore.openIssue(task.id). Use proper event handling to avoid conflicts with existing functionality. Ensure click area is appropriate and doesn't interfere with other interactive elements. Add cursor pointer styling to indicate clickability.",
+            "testStrategy": "Test clicking on task lines opens correct modal with right task data. Verify no conflicts with existing click handlers or interactive elements within the line component. Test keyboard navigation and accessibility.",
+            "priority": "medium",
+            "dependencies": [4],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 6,
+            "title": "Add Click Handlers to IssueCard Component",
+            "description": "Modify existing IssueCard component (if applicable) to open issue viewer modal when clicked",
+            "details": "Update src/components/IssueCard.tsx (or equivalent board view component) to add onClick handler similar to IssueLine. Call useIssueViewStore.openIssue(task.id) on card click. Handle event propagation properly and ensure click area covers appropriate parts of the card. Add hover states to indicate interactivity.",
+            "testStrategy": "Test clicking on task cards opens modal with correct task information. Verify proper interaction with any existing card functionality (drag/drop, etc.). Test responsive behavior and touch interactions on mobile devices.",
+            "priority": "medium",
+            "dependencies": [5],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 7,
+            "title": "Implement Action Buttons Placeholder",
+            "description": "Add standard action buttons (Edit, Delete, Copy) in DialogFooter in disabled/noop state to prepare UI structure for future functionality",
+            "details": "Create DialogFooter section in TaskDetailsView with standard action buttons: Edit, Delete, Copy, and Close. Style buttons as disabled or with subtle indication they're inactive. Use existing button components and styling patterns. Add onClick handlers that do nothing (noop) for Edit/Delete/Copy, proper closeIssue() for Close button. Structure UI for easy future enhancement.",
+            "testStrategy": "Verify action buttons are visually present but clearly indicated as inactive. Test Close button properly closes modal. Ensure button layout is responsive and follows existing design patterns. Test keyboard navigation through buttons.",
+            "priority": "low",
+            "dependencies": [6],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 8,
+            "title": "Style and Polish Modal Layout",
+            "description": "Apply consistent styling, spacing, and visual hierarchy to the modal components following existing design patterns",
+            "details": "Apply proper CSS classes and styling to IssueViewModal and TaskDetailsView. Use existing design tokens, spacing, typography, and color schemes. Ensure visual hierarchy with prominent title/status, readable body text, and clear section separation. Make responsive for different screen sizes. Follow shadcn/ui Dialog styling patterns and customize as needed.",
+            "testStrategy": "Visual testing across different screen sizes and task data variations. Verify consistent styling with rest of application. Test modal appearance with long text content, many labels, and minimal data. Check dark/light theme compatibility if applicable.",
+            "priority": "medium",
+            "dependencies": [7],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 9,
+            "title": "Integrate Modal with Existing Page Layouts",
+            "description": "Add IssueViewModal component to main application layout and ensure proper integration with existing views",
+            "details": "Import and include IssueViewModal component in main layout or page components where task lists are displayed (AllIssuesPage, BoardView, etc.). Ensure modal renders above existing content with proper z-index. Test integration with existing routing and state management. Verify modal doesn't interfere with other UI components or overlays.",
+            "testStrategy": "Test modal functionality from different pages and views in the application. Verify proper rendering order and z-index stacking. Test interaction with existing modals, dropdowns, or overlays. Ensure navigation and routing work correctly with modal open.",
+            "priority": "medium",
+            "dependencies": [8],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 10,
+            "title": "Add Keyboard Shortcuts and Accessibility",
+            "description": "Implement comprehensive keyboard support and accessibility features for the issue viewer modal",
+            "details": "Implement ESC key to close modal, proper focus management when opening/closing, tab navigation through modal content, and ARIA attributes for screen readers. Add focus trap within modal and restore focus to triggering element on close. Ensure all interactive elements are keyboard accessible. Follow WCAG guidelines for modal accessibility.",
+            "testStrategy": "Test complete keyboard navigation - tab through all elements, ESC to close, focus management on open/close. Test with screen reader for proper announcements and navigation. Verify focus trap prevents focus from leaving modal. Test keyboard shortcuts don't conflict with browser or application shortcuts.",
+            "priority": "medium",
+            "dependencies": [9],
+            "status": "pending",
+            "subtasks": []
+         }
+      ],
+      "metadata": {
+         "created": "2025-06-29T13:28:30.206Z",
+         "updated": "2025-06-29T13:29:34.349Z",
+         "description": "Tasks for issue-viewer context"
+      }
    }
 }

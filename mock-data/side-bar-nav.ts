@@ -31,9 +31,9 @@ export const inboxItems = [
 
 export const workspaceItems = [
    {
-      name: 'Teams',
-      url: '/lndev-ui/teams',
-      icon: ContactRound,
+      name: 'All Issues',
+      url: '/lndev-ui/issues',
+      icon: FolderKanban,
    },
    {
       name: 'Projects',

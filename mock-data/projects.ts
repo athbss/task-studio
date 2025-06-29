@@ -21,10 +21,15 @@ import {
    TrafficCone,
    Vault,
    Wallpaper,
+   Tag,
+   FolderOpen,
+   GitBranch,
+   Package,
 } from 'lucide-react';
 import { RemixiconComponentType } from '@remixicon/react';
 import { User, users } from './users';
 import { Priority, priorities } from './priorities';
+
 export interface Project {
    id: string;
    name: string;
@@ -71,225 +76,100 @@ export const health: Health[] = [
    },
 ];
 
+// Helper function to get icon for tag name
+function getIconForTag(tagName: string): LucideIcon {
+   const iconMap: Record<string, LucideIcon> = {
+      'master': GitBranch,
+      'main': GitBranch,
+      'issue-viewer': FormInput,
+      'feature': Package,
+      'bug': Bomb,
+      'docs': HelpCircle,
+      'test': Play,
+      'ui': Blocks,
+      'api': Globe,
+      'auth': Lock,
+      'dashboard': LayoutDashboard,
+      'settings': Settings,
+   };
+
+   // Check if tag name contains any of the keywords
+   const tagLower = tagName.toLowerCase();
+   for (const [keyword, icon] of Object.entries(iconMap)) {
+      if (tagLower.includes(keyword)) {
+         return icon;
+      }
+   }
+
+   // Default icon
+   return Tag;
+}
+
+// Function to create project from Taskmaster tag data
+export function createProjectFromTag(
+   tagName: string,
+   taskCount: number,
+   metadata?: any,
+   index: number = 0
+): Project {
+   // Calculate completion percentage based on task statuses (if available)
+   // For now, using a mock calculation
+   const percentComplete = Math.floor(Math.random() * 100);
+
+   // Select status based on some logic (could be based on task completion)
+   const projectStatus =
+      percentComplete === 100
+         ? status[5]
+         : percentComplete > 80
+           ? status[4]
+           : percentComplete > 60
+             ? status[3]
+             : percentComplete > 40
+               ? status[2]
+               : percentComplete > 20
+                 ? status[1]
+                 : status[0];
+
+   // Determine health based on various factors
+   const projectHealth =
+      percentComplete > 70
+         ? health[2] // on-track
+         : percentComplete > 40
+           ? health[3] // at-risk
+           : percentComplete > 20
+             ? health[1] // off-track
+             : health[0]; // no-update
+
+   return {
+      id: tagName,
+      name:
+         tagName === 'master'
+            ? 'General'
+            : tagName
+                 .split('-')
+                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                 .join(' '),
+      status: projectStatus,
+      icon: getIconForTag(tagName),
+      percentComplete,
+      startDate: metadata?.created || new Date().toISOString().split('T')[0],
+      lead: users[0], // Default to first user
+      priority: priorities[index % priorities.length],
+      health: projectHealth,
+   };
+}
+
+// Export a function that can be used to get projects from actual tags
+export function getProjectsFromTags(
+   tags: Array<{ name: string; taskCount: number; metadata?: any }>
+): Project[] {
+   return tags.map((tag, index) =>
+      createProjectFromTag(tag.name, tag.taskCount, tag.metadata, index)
+   );
+}
+
+// Default mock projects for fallback/demo purposes
 export const projects: Project[] = [
-   {
-      id: '1',
-      name: 'LNDev UI - Core Components',
-      status: status[0],
-      icon: Cuboid,
-      percentComplete: 80,
-      startDate: '2025-03-08',
-      lead: users[0],
-      priority: priorities[1],
-      health: health[0],
-   },
-   {
-      id: '2',
-      name: 'LNDev UI - Theming',
-      status: status[1],
-      icon: Blocks,
-      percentComplete: 50,
-      startDate: '2025-03-14',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[3],
-   },
-   {
-      id: '3',
-      name: 'LNDev UI - Modals',
-      status: status[2],
-      icon: Vault,
-      percentComplete: 0,
-      startDate: '2025-03-09',
-      lead: users[0],
-      priority: priorities[2],
-      health: health[1],
-   },
-   {
-      id: '4',
-      name: 'LNDev UI - Navigation',
-      status: status[3],
-      icon: BrickWall,
-      percentComplete: 0,
-      startDate: '2025-03-10',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[2],
-   },
-   {
-      id: '5',
-      name: 'LNDev UI - Layout',
-      status: status[4],
-      icon: Wallpaper,
-      percentComplete: 0,
-      startDate: '2025-03-11',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[3],
-   },
-   {
-      id: '6',
-      name: 'LNDev UI - Sidebar',
-      status: status[5],
-      icon: TrafficCone,
-      percentComplete: 0,
-      startDate: '2025-03-12',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[1],
-   },
-   {
-      id: '7',
-      name: 'LNDev UI - Cards',
-      status: status[1],
-      icon: Grid2X2,
-      percentComplete: 0,
-      startDate: '2025-03-13',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[2],
-   },
-   {
-      id: '8',
-      name: 'LNDev UI - Tooltip',
-      status: status[2],
-      icon: Bomb,
-      percentComplete: 0,
-      startDate: '2025-03-14',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[3],
-   },
-   {
-      id: '9',
-      name: 'LNDev UI - Dropdown',
-      status: status[3],
-      icon: Shapes,
-      percentComplete: 50,
-      startDate: '2025-03-15',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[3],
-   },
-   {
-      id: '10',
-      name: 'LNDev UI - Data Tables',
-      status: status[0],
-      icon: Table,
-      percentComplete: 65,
-      startDate: '2025-03-18',
-      lead: users[0],
-      priority: priorities[1],
-      health: health[0],
-   },
-   {
-      id: '11',
-      name: 'LNDev UI - Form Controls',
-      status: status[2],
-      icon: FormInput,
-      percentComplete: 30,
-      startDate: '2025-03-19',
-      lead: users[0],
-      priority: priorities[1],
-      health: health[2],
-   },
-   {
-      id: '12',
-      name: 'LNDev UI - Notifications',
-      status: status[1],
-      icon: Bell,
-      percentComplete: 45,
-      startDate: '2025-03-20',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[1],
-   },
-   {
-      id: '13',
-      name: 'LNDev UI - Authentication Flow',
-      status: status[0],
-      icon: Lock,
-      percentComplete: 75,
-      startDate: '2025-03-05',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[0],
-   },
-   {
-      id: '14',
-      name: 'LNDev UI - User Preferences',
-      status: status[3],
-      icon: Settings,
-      percentComplete: 10,
-      startDate: '2025-03-22',
-      lead: users[0],
-      priority: priorities[2],
-      health: health[2],
-   },
-   {
-      id: '15',
-      name: 'LNDev UI - Dashboard Widgets',
-      status: status[1],
-      icon: LayoutDashboard,
-      percentComplete: 55,
-      startDate: '2025-03-17',
-      lead: users[0],
-      priority: priorities[1],
-      health: health[0],
-   },
-   {
-      id: '16',
-      name: 'LNDev UI - Onboarding Guide',
-      status: status[2],
-      icon: HelpCircle,
-      percentComplete: 25,
-      startDate: '2025-03-24',
-      lead: users[0],
-      priority: priorities[1],
-      health: health[3],
-   },
-   {
-      id: '17',
-      name: 'LNDev UI - Progress Indicators',
-      status: status[4],
-      icon: Loader,
-      percentComplete: 40,
-      startDate: '2025-03-16',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[1],
-   },
-   {
-      id: '18',
-      name: 'LNDev UI - Internationalization',
-      status: status[5],
-      icon: Globe,
-      percentComplete: 15,
-      startDate: '2025-03-25',
-      lead: users[0],
-      priority: priorities[2],
-      health: health[2],
-   },
-   {
-      id: '19',
-      name: 'LNDev UI - Accessibility Features',
-      status: status[0],
-      icon: Accessibility,
-      percentComplete: 60,
-      startDate: '2025-03-21',
-      lead: users[0],
-      priority: priorities[0],
-      health: health[0],
-   },
-   {
-      id: '20',
-      name: 'LNDev UI - Media Player',
-      status: status[3],
-      icon: Play,
-      percentComplete: 20,
-      startDate: '2025-03-26',
-      lead: users[0],
-      priority: priorities[1],
-      health: health[3],
-   },
+   createProjectFromTag('master', 8, { created: '2025-03-01' }, 0),
+   createProjectFromTag('issue-viewer', 10, { created: '2025-03-08' }, 1),
 ];

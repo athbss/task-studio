@@ -1,6 +1,7 @@
 'use client';
 
-import { useCurrentTagWithTasks } from '@/hooks/use-taskmaster-queries';
+import { useCurrentTagWithTasks, useTasksByTag } from '@/hooks/use-taskmaster-queries';
+import { useAllTasks } from '@/hooks/use-all-tasks';
 import { TaskmasterTask } from '@/types/taskmaster';
 import { Status, ToDoIcon, InProgressIcon, CompletedIcon, PausedIcon } from '@/mock-data/status';
 import { Priority } from '@/mock-data/priorities';
@@ -18,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { Issue } from '@/mock-data/issues';
 
 // Convert Taskmaster task to Issue format for compatibility
-function taskToIssue(task: TaskmasterTask): Issue {
+function taskToIssue(task: TaskmasterTask & { tagName?: string }): Issue {
    const statusMap = {
       'pending': { name: 'To Do', color: '#6B7280', icon: ToDoIcon },
       'in_progress': { name: 'In Progress', color: '#3B82F6', icon: InProgressIcon },
@@ -30,8 +31,8 @@ function taskToIssue(task: TaskmasterTask): Issue {
    const statusInfo = statusMap[task.status as keyof typeof statusMap] || statusMap.pending; // Default to pending if not found
 
    return {
-      id: task.id.toString(),
-      identifier: `T-${task.id}`,
+      id: task.tagName ? `${task.tagName}-${task.id}` : task.id.toString(),
+      identifier: task.tagName ? `${task.tagName.toUpperCase()}-${task.id}` : `T-${task.id}`,
       title: task.title,
       description: task.description,
       status: {
@@ -68,16 +69,46 @@ function taskToIssue(task: TaskmasterTask): Issue {
 const taskmasterStatuses: Status[] = [
    { id: 'pending', name: 'To Do', color: '#6B7280', icon: ToDoIcon },
    { id: 'in_progress', name: 'In Progress', color: '#3B82F6', icon: InProgressIcon },
-   { id: 'in-progress', name: 'In Progress', color: '#3B82F6', icon: InProgressIcon },
    { id: 'done', name: 'Done', color: '#10B981', icon: CompletedIcon },
    { id: 'cancelled', name: 'Cancelled', color: '#EF4444', icon: PausedIcon },
 ];
 
-export default function AllIssues() {
+export default function AllIssues({
+   showAllTags = false,
+   tagName,
+}: {
+   showAllTags?: boolean;
+   tagName?: string;
+}) {
    const { isSearchOpen, searchQuery } = useSearchStore();
    const { viewType } = useViewStore();
    const { hasActiveFilters } = useFilterStore();
-   const { tasks, isLoading, error } = useCurrentTagWithTasks();
+
+   // Use different hooks based on what we want to show
+   const currentTagData = useCurrentTagWithTasks();
+   const allTagsData = useAllTasks();
+   const specificTagData = useTasksByTag(tagName || '');
+
+   let isLoading: boolean;
+   let error: any;
+   let tasks: TaskmasterTask[];
+
+   if (showAllTags) {
+      // Show all tags
+      isLoading = allTagsData.isLoading;
+      error = allTagsData.error;
+      tasks = allTagsData.data?.allTasks || [];
+   } else if (tagName) {
+      // Show specific tag
+      isLoading = specificTagData.isLoading;
+      error = specificTagData.error;
+      tasks = specificTagData.data?.tasks || [];
+   } else {
+      // Show current tag
+      isLoading = currentTagData.isLoading;
+      error = currentTagData.error;
+      tasks = currentTagData.tasks;
+   }
 
    const isSearching = isSearchOpen && searchQuery.trim() !== '';
    const isViewTypeGrid = viewType === 'grid';

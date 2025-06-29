@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function OrgIdPage() {
-   redirect('lndev-ui/team/CLAUDE/all');
+   redirect('/lndev-ui/issues');
 }
