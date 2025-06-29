@@ -1,0 +1,228 @@
+{
+   "master": {
+      "tasks": [
+         {
+            "id": 3,
+            "title": "Define TypeScript Data Models and Interfaces",
+            "description": "Create mapping utilities to transform Taskmaster CLI data into existing Issue/Project interfaces and establish validation schemas",
+            "status": "pending",
+            "dependencies": [],
+            "priority": "medium",
+            "details": "Create /lib/taskmaster-mapping.ts with transformation functions to map Taskmaster CLI task data to existing Issue interface fields. Map Taskmaster status values to existing Status interface, priority levels to Priority interface, and tag contexts to Project interface. Create Zod schemas for Taskmaster CLI data validation and Issue/Project runtime validation. Implement utility functions for bidirectional mapping between Taskmaster task format and UI Issue format.",
+            "testStrategy": "Test mapping functions with real Taskmaster CLI output, verify all Issue interface fields are properly populated, validate Zod schemas with sample data, ensure round-trip mapping preserves data integrity",
+            "subtasks": [
+               {
+                  "id": 1,
+                  "title": "Analyze existing Issue/Project interfaces",
+                  "description": "Review existing interfaces in /mock-data/ to understand current data structure",
+                  "status": "pending",
+                  "dependencies": [],
+                  "details": "",
+                  "testStrategy": ""
+               },
+               {
+                  "id": 2,
+                  "title": "Create Taskmaster to Issue mapping functions",
+                  "description": "Implement functions to transform Taskmaster task data to Issue interface format",
+                  "status": "pending",
+                  "dependencies": [],
+                  "details": "",
+                  "testStrategy": ""
+               },
+               {
+                  "id": 3,
+                  "title": "Map Taskmaster tags to Project interface",
+                  "description": "Create mapping logic to represent Taskmaster tag contexts as Project entities",
+                  "status": "pending",
+                  "dependencies": [],
+                  "details": "",
+                  "testStrategy": ""
+               },
+               {
+                  "id": 4,
+                  "title": "Create Zod validation schemas",
+                  "description": "Add Zod schemas for Taskmaster CLI data validation and Issue/Project runtime validation",
+                  "status": "pending",
+                  "dependencies": [],
+                  "details": "",
+                  "testStrategy": ""
+               },
+               {
+                  "id": 5,
+                  "title": "Implement bidirectional mapping utilities",
+                  "description": "Create utility functions for converting between Taskmaster and UI data formats",
+                  "status": "pending",
+                  "dependencies": [],
+                  "details": "",
+                  "testStrategy": ""
+               }
+            ]
+         },
+         {
+            "id": 4,
+            "title": "Implement File Reading and JSON Parsing",
+            "description": "Create Next.js API routes and service layer for local file system access to read and parse .taskmaster/tasks/tasks.json files with error handling",
+            "status": "pending",
+            "dependencies": [3, "11"],
+            "priority": "high",
+            "details": "Create Next.js API routes in /pages/api/ or /app/api/ directory to handle local file system operations. Implement /lib/taskmaster-service.ts with functions to read tasks.json through API routes, parse tag-based structure, handle file not found errors. Create API endpoints for getCurrentTag() to read from state.json via Node.js file system APIs. Add JSON validation using Zod schemas. Handle malformed JSON gracefully with detailed error messages. Support relative and absolute paths to .taskmaster directory. Ensure proper error handling between API routes and client-side service calls.",
+            "testStrategy": "Test API routes with valid and invalid JSON files, verify error handling for missing files through API layer, test with different .taskmaster directory structures, validate file system permissions, test client-server communication for file operations",
+            "subtasks": [
+               {
+                  "id": 1,
+                  "title": "Create Next.js API routes for file system access",
+                  "description": "Set up API endpoints to handle local file reading using Node.js fs module",
+                  "status": "pending",
+                  "dependencies": [],
+                  "details": "",
+                  "testStrategy": ""
+               },
+               {
+                  "id": 2,
+                  "title": "Implement Node.js file system operations",
+                  "description": "Use Node.js fs module to read local files directly in API routes",
+                  "status": "pending",
+                  "dependencies": [1],
+                  "details": "",
+                  "testStrategy": ""
+               },
+               {
+                  "id": 3,
+                  "title": "Create taskmaster service with API integration",
+                  "description": "Build service layer that communicates with API routes for file operations",
+                  "status": "pending",
+                  "dependencies": [2],
+                  "details": "",
+                  "testStrategy": ""
+               },
+               {
+                  "id": 4,
+                  "title": "Add error handling for API-based file operations",
+                  "description": "Implement proper error handling between client and API routes",
+                  "status": "pending",
+                  "dependencies": [3],
+                  "details": "",
+                  "testStrategy": ""
+               }
+            ]
+         },
+         {
+            "id": 6,
+            "title": "Connect Kanban Board View to Taskmaster Data",
+            "description": "Connect existing board view component to read from .taskmaster/tasks.json organizing tasks by status with proper data mapping",
+            "status": "pending",
+            "dependencies": [],
+            "priority": "medium",
+            "details": "Update existing /components/board-view.tsx to connect to Taskmaster data source. Map Taskmaster status values (pending, in_progress, done, cancelled) to kanban columns. Use the existing API endpoints to fetch tasks.json data. Implement proper error handling for missing or invalid task data. Ensure component handles tag-specific task filtering when tag context is switched. Maintain existing drag-and-drop visual feedback (read-only mode). Update column headers to show accurate task counts from Taskmaster data.",
+            "testStrategy": "Test board displays real Taskmaster data correctly, verify status mapping works for all task states, test with different tag contexts, ensure proper error handling for corrupted data files",
+            "subtasks": []
+         },
+         {
+            "id": 7,
+            "title": "Connect List View to Taskmaster Task Structure",
+            "description": "Integrate existing list view component with Taskmaster data structure and field mapping",
+            "status": "pending",
+            "dependencies": [],
+            "priority": "medium",
+            "details": "Update existing /components/list-view.tsx to consume Taskmaster tasks.json data. Map Taskmaster task fields (id, title, status, priority, details, subtasks) to table columns. Handle Taskmaster-specific data types like subtask arrays and dependencies. Update sorting logic to work with Taskmaster data format. Add columns specific to Taskmaster fields like subtask count and dependency references. Maintain existing table functionality while adapting to Taskmaster schema.",
+            "testStrategy": "Test list view displays all Taskmaster task fields correctly, verify sorting works with Taskmaster data types, test subtask and dependency display, ensure column visibility works with new field mapping",
+            "subtasks": []
+         },
+         {
+            "id": 8,
+            "title": "Connect Tag Navigation to Taskmaster Tag System",
+            "description": "Integrate existing sidebar component with Taskmaster's tagged task management system",
+            "status": "pending",
+            "dependencies": [4],
+            "priority": "medium",
+            "details": "Update existing /components/sidebar.tsx to read tag contexts from .taskmaster/state.json and tasks.json. Display available tags from Taskmaster's tagged system with proper metadata. Show current active tag from Taskmaster state. Calculate and display accurate task counts per tag from tasks.json data structure. Integrate with existing tag switching logic to update Taskmaster context. Handle Taskmaster tag metadata like descriptions and maintain existing UI functionality.",
+            "testStrategy": "Test sidebar shows all Taskmaster tags correctly, verify task counts match actual data per tag, test tag switching updates Taskmaster context properly, ensure metadata display works",
+            "subtasks": []
+         },
+         {
+            "id": 9,
+            "title": "Connect File Watching to Taskmaster Directory Structure",
+            "description": "Integrate existing WebSocket file watching with Taskmaster's .taskmaster directory monitoring",
+            "status": "pending",
+            "dependencies": [4],
+            "priority": "medium",
+            "details": "Update existing file watcher implementation to specifically monitor .taskmaster/tasks.json, .taskmaster/state.json, and .taskmaster/tasks/*.md files. Configure chokidar to watch Taskmaster-specific file patterns. Update WebSocket events to handle Taskmaster data structure changes. Modify client-side WebSocket handling to properly update UI when Taskmaster files change. Ensure file watcher respects Taskmaster's tag-based file organization and triggers appropriate UI updates for tag-specific changes.",
+            "testStrategy": "Test file watcher triggers on Taskmaster file changes, verify WebSocket updates work with tag-specific data changes, test with Taskmaster CLI operations modifying files, ensure no conflicts with Taskmaster's file management",
+            "subtasks": []
+         },
+         {
+            "id": 10,
+            "title": "Connect Search and Filtering to Taskmaster Data Schema",
+            "description": "Integrate existing search/filter functionality with Taskmaster task structure and tagged system",
+            "status": "pending",
+            "dependencies": [6, 7],
+            "priority": "low",
+            "details": "Update existing /components/search-filter.tsx to work with Taskmaster's data schema. Implement search across Taskmaster-specific fields (title, description, details, subtasks). Configure filters to work with Taskmaster status values, priority levels, and tag contexts. Update filter persistence to work with Taskmaster's tagged system URLs. Add filtering by Taskmaster-specific attributes like dependencies and subtask status. Ensure search works within current tag context and can optionally search across all tags.",
+            "testStrategy": "Test search works across all Taskmaster task fields, verify filters work with Taskmaster data types, test tag-specific search functionality, ensure URL persistence works with Taskmaster routing",
+            "subtasks": []
+         },
+         {
+            "id": 11,
+            "title": "Setup Next.js API routes for local file system access",
+            "description": "Create Next.js API routes to handle file system access for reading .taskmaster files locally, enabling the web application to access local file system through server-side API endpoints.",
+            "status": "in-progress",
+            "dependencies": [],
+            "priority": "high",
+            "details": "Create Next.js API routes under /api/taskmaster/ to handle file system operations for reading .taskmaster directory contents. Implement API endpoints for reading tasks.json, state.json, and markdown files from the local .taskmaster directory. Add proper error handling and validation for file paths to prevent directory traversal attacks. Create utility functions for safe file system operations with proper path sanitization. Implement endpoints for listing available .taskmaster directories, reading task files, and watching for file changes. Add proper TypeScript types for API responses. Configure Next.js to allow file system access in the API routes. Implement caching strategy for file reads to improve performance. Add middleware for request validation and rate limiting if needed. Ensure proper CORS configuration for local development.",
+            "testStrategy": "Test API routes can successfully read .taskmaster files from local file system, verify path sanitization prevents directory traversal attacks, test error handling for missing or corrupted files, verify API responses have correct TypeScript types, test file watching functionality for real-time updates, ensure proper performance with caching, test CORS configuration works for local development, verify rate limiting and validation middleware function correctly",
+            "subtasks": [
+               {
+                  "id": 3,
+                  "title": "Add request validation middleware and error handling",
+                  "description": "Implement comprehensive middleware for request validation, rate limiting, error handling, and CORS configuration for the taskmaster API routes.",
+                  "status": "in-progress",
+                  "dependencies": [],
+                  "details": "Create middleware/taskmaster.ts with rate limiting (using simple in-memory store), request validation using Zod schemas, centralized error handling with proper HTTP status codes, and CORS configuration for local development. Add logging for debugging and monitoring. Ensure all API routes use consistent error response format.",
+                  "testStrategy": "Test rate limiting behavior, CORS preflight requests, malformed request handling, and proper error response formats. Verify logging captures necessary debugging information"
+               },
+               {
+                  "id": 4,
+                  "title": "Create core file system utility functions with path sanitization",
+                  "description": "Implement secure utility functions for file system operations including path validation, sanitization, and safe file reading operations to prevent directory traversal attacks.",
+                  "status": "done",
+                  "dependencies": [],
+                  "details": "Create utils/filesystem.ts with functions for: validateTaskmasterPath() to ensure paths are within allowed directories, sanitizePath() to clean user input, safeReadFile() with proper error handling, and getTaskmasterDirectories() to list available .taskmaster directories. Include proper TypeScript types and comprehensive input validation.",
+                  "testStrategy": "Unit tests for path validation, sanitization edge cases, and security attack vectors like '../../../etc/passwd' attempts"
+               },
+               {
+                  "id": 5,
+                  "title": "Implement Next.js API routes for basic file operations",
+                  "description": "Create API endpoints under /api/taskmaster/ for reading tasks.json, state.json, and markdown files from local .taskmaster directories.",
+                  "status": "done",
+                  "dependencies": [1],
+                  "details": "Create /api/taskmaster/[...path].ts dynamic route handler supporting GET requests for file reading. Implement endpoints: /api/taskmaster/directories (list available), /api/taskmaster/{dir}/tasks.json, /api/taskmaster/{dir}/state.json, and /api/taskmaster/{dir}/tasks/{file}.md. Use the filesystem utilities from subtask 1 for all operations.",
+                  "testStrategy": "Integration tests for each endpoint, testing valid and invalid paths, non-existent files, and proper JSON/markdown parsing"
+               },
+               {
+                  "id": 1,
+                  "title": "Create core file system utility functions with path sanitization",
+                  "description": "Implement secure utility functions for file system operations including path validation, sanitization, and safe file reading operations to prevent directory traversal attacks.",
+                  "dependencies": [],
+                  "details": "Create utils/filesystem.ts with functions for: validateTaskmasterPath() to ensure paths are within allowed directories, sanitizePath() to clean user input, safeReadFile() with proper error handling, and getTaskmasterDirectories() to list available .taskmaster directories. Include proper TypeScript types and comprehensive input validation.",
+                  "status": "done",
+                  "testStrategy": "Unit tests for path validation, sanitization edge cases, and security attack vectors like '../../../etc/passwd' attempts"
+               },
+               {
+                  "id": 2,
+                  "title": "Implement Next.js API routes for basic file operations",
+                  "description": "Create API endpoints under /api/taskmaster/ for reading tasks.json, state.json, and markdown files from local .taskmaster directories.",
+                  "dependencies": [1],
+                  "details": "Create /api/taskmaster/[...path].ts dynamic route handler supporting GET requests for file reading. Implement endpoints: /api/taskmaster/directories (list available), /api/taskmaster/{dir}/tasks.json, /api/taskmaster/{dir}/state.json, and /api/taskmaster/{dir}/tasks/{file}.md. Use the filesystem utilities from subtask 1 for all operations.",
+                  "status": "done",
+                  "testStrategy": "Integration tests for each endpoint, testing valid and invalid paths, non-existent files, and proper JSON/markdown parsing"
+               }
+            ]
+         }
+      ],
+      "metadata": {
+         "created": "2025-06-29T11:25:40.187Z",
+         "updated": "2025-06-29T12:05:56.791Z",
+         "description": "Tasks for taskmaster-circle-ui context"
+      }
+   }
+}
