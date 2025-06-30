@@ -1,4 +1,4 @@
-import { groupIssuesByStatus, Issue, issues as mockIssues } from '@/mock-data/issues';
+import { groupIssuesByStatus, Issue } from '@/mock-data/issues';
 import { LabelInterface } from '@/mock-data/labels';
 import { Priority } from '@/mock-data/priorities';
 import { Project } from '@/mock-data/projects';
@@ -57,9 +57,9 @@ interface IssuesState {
 }
 
 export const useIssuesStore = create<IssuesState>((set, get) => ({
-   // Initial state
-   issues: mockIssues.sort((a, b) => b.rank.localeCompare(a.rank)),
-   issuesByStatus: groupIssuesByStatus(mockIssues),
+   // Initial state - empty since we use real Taskmaster data now
+   issues: [],
+   issuesByStatus: {},
 
    //
    getAllIssues: () => get().issues,

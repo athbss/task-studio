@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useIssuesStore } from '@/store/issues-store';
-import { status as allStatus, Status } from '@/mock-data/status';
+import { Status } from '@/mock-data/status';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
+import { TASKMASTER_STATUSES } from '@/lib/taskmaster-constants';
 
 interface StatusSelectorProps {
    status: Status;
@@ -36,7 +37,7 @@ export function StatusSelector({ status, issueId }: StatusSelectorProps) {
       setOpen(false);
 
       if (issueId) {
-         const newStatus = allStatus.find((s) => s.id === statusId);
+         const newStatus = TASKMASTER_STATUSES.find((s) => s.id === statusId);
          if (newStatus) {
             updateIssueStatus(issueId, newStatus);
          }
@@ -56,7 +57,7 @@ export function StatusSelector({ status, issueId }: StatusSelectorProps) {
                   aria-expanded={open}
                >
                   {(() => {
-                     const selectedItem = allStatus.find((item) => item.id === value);
+                     const selectedItem = TASKMASTER_STATUSES.find((item) => item.id === value);
                      if (selectedItem) {
                         const Icon = selectedItem.icon;
                         return <Icon />;
@@ -74,7 +75,7 @@ export function StatusSelector({ status, issueId }: StatusSelectorProps) {
                   <CommandList>
                      <CommandEmpty>No status found.</CommandEmpty>
                      <CommandGroup>
-                        {allStatus.map((item) => (
+                        {TASKMASTER_STATUSES.map((item) => (
                            <CommandItem
                               key={item.id}
                               value={item.id}

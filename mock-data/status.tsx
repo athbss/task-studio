@@ -1,4 +1,5 @@
 import React from 'react';
+import { CircleX } from 'lucide-react';
 
 export interface Status {
    id: string;
@@ -37,32 +38,7 @@ export const BacklogIcon: React.FC = () => {
 };
 
 export const PausedIcon: React.FC = () => {
-   return (
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-         <circle
-            cx="7"
-            cy="7"
-            r="6"
-            fill="none"
-            stroke="#0ea5e9"
-            strokeWidth="2"
-            strokeDasharray="3.14 0"
-            strokeDashoffset="-0.7"
-         ></circle>
-         <circle
-            className="progress"
-            cx="7"
-            cy="7"
-            r="2"
-            fill="none"
-            stroke="#0ea5e9"
-            strokeWidth="4"
-            strokeDasharray="6.2517693806436885 100"
-            strokeDashoffset="0"
-            transform="rotate(-90 7 7)"
-         ></circle>
-      </svg>
-   );
+   return <CircleX className="w-[14px] h-[14px]" style={{ color: '#EF4444' }} />;
 };
 
 export const ToDoIcon: React.FC = () => {
@@ -115,7 +91,7 @@ export const InProgressIcon: React.FC = () => {
             fill="none"
             stroke="#facc15"
             strokeWidth="4"
-            strokeDasharray="2.0839231268812295 100"
+            strokeDasharray="6.2517693806436885 100"
             strokeDashoffset="0"
             transform="rotate(-90 7 7)"
          ></circle>
@@ -177,7 +153,7 @@ export const CompletedIcon: React.FC = () => {
 };
 
 export const status: Status[] = [
-   { id: 'in-progress', name: 'In Progress', color: '#facc15', icon: InProgressIcon },
+   { id: 'in-progress', name: 'In Progress', color: '#3B82F6', icon: InProgressIcon },
    {
       id: 'technical-review',
       name: 'Technical Review',
@@ -185,7 +161,7 @@ export const status: Status[] = [
       icon: TechnicalReviewIcon,
    },
    { id: 'completed', name: 'Completed', color: '#8b5cf6', icon: CompletedIcon },
-   { id: 'paused', name: 'Paused', color: '#0ea5e9', icon: PausedIcon },
+   { id: 'paused', name: 'Paused', color: '#EF4444', icon: PausedIcon },
    { id: 'to-do', name: 'Todo', color: '#f97316', icon: ToDoIcon },
    { id: 'backlog', name: 'Backlog', color: '#ec4899', icon: BacklogIcon },
 ];

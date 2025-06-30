@@ -3,27 +3,31 @@
 import { Issue } from '@/mock-data/issues';
 import { Status } from '@/mock-data/status';
 import { useIssuesStore } from '@/store/issues-store';
-import { useViewStore } from '@/store/view-store';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import { FC, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import { Button } from '../../ui/button';
 import { IssueDragType, IssueGrid } from './issue-grid';
-import { IssueLine } from './issue-line';
+import { IssueWithSubtasks } from './issue-with-subtasks';
 import { useCreateIssueStore } from '@/store/create-issue-store';
 import { sortIssuesByPriority } from '@/mock-data/issues';
 import { AnimatePresence, motion } from 'motion/react';
+import { useQueryState } from 'nuqs';
 
 interface GroupIssuesProps {
    status: Status;
    issues: Issue[];
    count: number;
+   showProjectBadge?: boolean;
 }
 
-export function GroupIssues({ status, issues, count }: GroupIssuesProps) {
-   const { viewType } = useViewStore();
-   const isViewTypeGrid = viewType === 'grid';
+export function GroupIssues({ status, issues, count, showProjectBadge }: GroupIssuesProps) {
+   const [viewType] = useQueryState('view', {
+      defaultValue: 'list',
+      parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+   });
+   const isViewTypeBoard = viewType === 'board';
    const { openModal } = useCreateIssueStore();
    const sortedIssues = sortIssuesByPriority(issues);
 
@@ -31,7 +35,7 @@ export function GroupIssues({ status, issues, count }: GroupIssuesProps) {
       <div
          className={cn(
             'bg-conainer',
-            isViewTypeGrid
+            isViewTypeBoard
                ? 'overflow-hidden rounded-md h-full flex-shrink-0 w-[348px] flex flex-col'
                : ''
          )}
@@ -39,16 +43,16 @@ export function GroupIssues({ status, issues, count }: GroupIssuesProps) {
          <div
             className={cn(
                'sticky top-0 z-10 bg-container w-full',
-               isViewTypeGrid ? 'rounded-t-md h-[50px]' : 'h-10'
+               isViewTypeBoard ? 'rounded-t-md h-[50px]' : 'h-10'
             )}
          >
             <div
                className={cn(
                   'w-full h-full flex items-center justify-between',
-                  isViewTypeGrid ? 'px-3' : 'px-6'
+                  isViewTypeBoard ? 'px-3' : 'px-6'
                )}
                style={{
-                  backgroundColor: isViewTypeGrid ? `${status.color}10` : `${status.color}08`,
+                  backgroundColor: isViewTypeBoard ? `${status.color}10` : `${status.color}08`,
                }}
             >
                <div className="flex items-center gap-2">
@@ -74,17 +78,26 @@ export function GroupIssues({ status, issues, count }: GroupIssuesProps) {
          {viewType === 'list' ? (
             <div className="space-y-0">
                {sortedIssues.map((issue) => (
-                  <IssueLine key={issue.id} issue={issue} layoutId={true} />
+                  <IssueWithSubtasks
+                     key={issue.id}
+                     issue={issue}
+                     layoutId={true}
+                     showProjectBadge={showProjectBadge}
+                  />
                ))}
             </div>
          ) : (
-            <IssueGridList issues={issues} status={status} />
+            <IssueGridList issues={issues} status={status} showProjectBadge={showProjectBadge} />
          )}
       </div>
    );
 }
 
-const IssueGridList: FC<{ issues: Issue[]; status: Status }> = ({ issues, status }) => {
+const IssueGridList: FC<{ issues: Issue[]; status: Status; showProjectBadge?: boolean }> = ({
+   issues,
+   status,
+   showProjectBadge,
+}) => {
    const ref = useRef<HTMLDivElement>(null);
    const { updateIssueStatus } = useIssuesStore();
 
@@ -130,7 +143,7 @@ const IssueGridList: FC<{ issues: Issue[]; status: Status }> = ({ issues, status
             )}
          </AnimatePresence>
          {sortedIssues.map((issue) => (
-            <IssueGrid key={issue.id} issue={issue} />
+            <IssueGrid key={issue.id} issue={issue} showProjectBadge={showProjectBadge} />
          ))}
       </div>
    );

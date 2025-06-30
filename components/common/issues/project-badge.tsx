@@ -3,8 +3,11 @@ import { Project } from '@/mock-data/projects';
 import Link from 'next/link';
 
 export function ProjectBadge({ project }: { project: Project }) {
+   // Project ID is the tag name
+   const tagName = project.id;
+
    return (
-      <Link href={`/lndev-ui/projects/all`} className="flex items-center justify-center gap-.5">
+      <Link href={`/tag/${tagName}`} className="flex items-center justify-center gap-.5">
          <Badge
             variant="outline"
             className="gap-1.5 rounded-full text-muted-foreground bg-background"

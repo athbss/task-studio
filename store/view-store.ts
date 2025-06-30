@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ViewType = 'list' | 'grid';
+export type ViewType = 'list' | 'board';
 
 interface ViewState {
    viewType: ViewType;

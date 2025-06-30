@@ -11,6 +11,7 @@ import { Issue } from '@/mock-data/issues';
 import { priorities } from '@/mock-data/priorities';
 import { status } from '@/mock-data/status';
 import { useIssuesStore } from '@/store/issues-store';
+import { users } from '@/mock-data/users';
 import { useCreateIssueStore } from '@/store/create-issue-store';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,13 +43,16 @@ export function CreateNewIssue() {
 
    const createDefaultData = useCallback(() => {
       const identifier = generateUniqueIdentifier();
+      // Auto-assign to the only member if there's exactly one
+      const defaultAssignee = users.length === 1 ? users[0] : null;
+
       return {
          id: uuidv4(),
          identifier: `LNUI-${identifier}`,
          title: '',
          description: '',
          status: defaultStatus || status.find((s) => s.id === 'to-do')!,
-         assignee: null,
+         assignee: defaultAssignee,
          priority: priorities.find((p) => p.id === 'no-priority')!,
          labels: [],
          createdAt: new Date().toISOString(),

@@ -11,12 +11,14 @@ import { LabelBadge } from './label-badge';
 import { PrioritySelector } from './priority-selector';
 import { ProjectBadge } from './project-badge';
 import { StatusSelector } from './status-selector';
+import { useIssueViewStore } from '@/store/issue-view-store';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { IssueContextMenu } from './issue-context-menu';
 
 export const IssueDragType = 'ISSUE';
 type IssueGridProps = {
    issue: Issue;
+   showProjectBadge?: boolean;
 };
 
 // Custom DragLayer component to render the drag preview
@@ -74,8 +76,9 @@ export function CustomDragLayer() {
    );
 }
 
-export function IssueGrid({ issue }: IssueGridProps) {
+export function IssueGrid({ issue, showProjectBadge = true }: IssueGridProps) {
    const ref = useRef<HTMLDivElement>(null);
+   const { openIssue } = useIssueViewStore();
 
    // Set up drag functionality.
    const [{ isDragging }, drag, preview] = useDrag(() => ({
@@ -99,17 +102,31 @@ export function IssueGrid({ issue }: IssueGridProps) {
    // Connect drag and drop to the element.
    drag(drop(ref));
 
+   const handleClick = (e: React.MouseEvent) => {
+      // Check if the click originated from an interactive element
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest(
+         'button, [role="button"], [role="combobox"], a, input, select, textarea'
+      );
+
+      // Don't open modal if dragging or clicking on interactive elements
+      if (!isDragging && !isInteractive) {
+         openIssue(issue.id);
+      }
+   };
+
    return (
       <ContextMenu>
          <ContextMenuTrigger asChild>
             <motion.div
                ref={ref}
-               className="w-full p-3 bg-background rounded-md shadow-xs border border-border/50 cursor-default"
+               className="w-full p-3 bg-background rounded-md shadow-xs border border-border/50 cursor-pointer hover:border-border"
                layoutId={`issue-grid-${issue.identifier}`}
                style={{
                   opacity: isDragging ? 0.5 : 1,
-                  cursor: isDragging ? 'grabbing' : 'default',
+                  cursor: isDragging ? 'grabbing' : 'pointer',
                }}
+               onClick={handleClick}
             >
                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
@@ -123,7 +140,7 @@ export function IssueGrid({ issue }: IssueGridProps) {
                <h3 className="text-sm font-semibold mb-3 line-clamp-2">{issue.title}</h3>
                <div className="flex flex-wrap gap-1.5 mb-3 min-h-[1.5rem]">
                   <LabelBadge label={issue.labels} />
-                  {issue.project && <ProjectBadge project={issue.project} />}
+                  {issue.project && showProjectBadge && <ProjectBadge project={issue.project} />}
                </div>
                <div className="flex items-center justify-between mt-auto pt-2">
                   <span className="text-xs text-muted-foreground">

@@ -3,36 +3,48 @@
 import { useCurrentTagWithTasks, useTasksByTag } from '@/hooks/use-taskmaster-queries';
 import { useAllTasks } from '@/hooks/use-all-tasks';
 import { TaskmasterTask } from '@/types/taskmaster';
-import { Status, ToDoIcon, InProgressIcon, CompletedIcon, PausedIcon } from '@/mock-data/status';
+import { createProjectFromTag } from '@/mock-data/projects';
+import { useQueryState } from 'nuqs';
 import { Priority } from '@/mock-data/priorities';
+import { TASKMASTER_STATUSES, TASKMASTER_STATUS_MAP } from '@/lib/taskmaster-constants';
 import { User } from '@/mock-data/users';
 import { useSearchStore } from '@/store/search-store';
-import { useViewStore } from '@/store/view-store';
 import { useFilterStore } from '@/store/filter-store';
 import { FC, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { GroupIssues } from './group-issues';
-import { IssueLine } from './issue-line';
+import { IssueWithSubtasks } from './issue-with-subtasks';
 import { CustomDragLayer } from './issue-grid';
 import { cn } from '@/lib/utils';
 import { Issue } from '@/mock-data/issues';
 
+// Generate tag prefix from tag name
+function getTagPrefix(tagName: string): string {
+   // Split by hyphens or spaces
+   const words = tagName.split(/[-\s]+/);
+
+   if (words.length > 1) {
+      // Use first letter of each word
+      return words.map((word) => word.charAt(0).toUpperCase()).join('');
+   } else {
+      // Single word: use first 2 letters
+      return tagName.substring(0, 2).toUpperCase();
+   }
+}
+
 // Convert Taskmaster task to Issue format for compatibility
 function taskToIssue(task: TaskmasterTask & { tagName?: string }): Issue {
-   const statusMap = {
-      'pending': { name: 'To Do', color: '#6B7280', icon: ToDoIcon },
-      'in_progress': { name: 'In Progress', color: '#3B82F6', icon: InProgressIcon },
-      'in-progress': { name: 'In Progress', color: '#3B82F6', icon: InProgressIcon }, // Also handle hyphenated version
-      'done': { name: 'Done', color: '#10B981', icon: CompletedIcon },
-      'cancelled': { name: 'Cancelled', color: '#EF4444', icon: PausedIcon },
-   };
-
-   const statusInfo = statusMap[task.status as keyof typeof statusMap] || statusMap.pending; // Default to pending if not found
+   const statusInfo =
+      TASKMASTER_STATUS_MAP[task.status as keyof typeof TASKMASTER_STATUS_MAP] ||
+      TASKMASTER_STATUS_MAP.pending; // Default to pending if not found
 
    return {
       id: task.tagName ? `${task.tagName}-${task.id}` : task.id.toString(),
-      identifier: task.tagName ? `${task.tagName.toUpperCase()}-${task.id}` : `T-${task.id}`,
+      identifier:
+         task.tagName && task.tagName !== 'master'
+            ? `${getTagPrefix(task.tagName)}-${task.id}`
+            : task.id.toString(),
       title: task.title,
       description: task.description,
       status: {
@@ -58,20 +70,13 @@ function taskToIssue(task: TaskmasterTask & { tagName?: string }): Issue {
             name: label,
             color: '#8B5CF6',
          })) || [],
-      project: undefined,
+      project: task.tagName ? createProjectFromTag(task.tagName, 0, undefined, 0) : undefined,
       createdAt: new Date().toISOString(),
       cycleId: '1',
       rank: task.id.toString(),
+      subtasks: task.subtasks, // Pass through subtasks
    };
 }
-
-// Taskmaster status definitions
-const taskmasterStatuses: Status[] = [
-   { id: 'pending', name: 'To Do', color: '#6B7280', icon: ToDoIcon },
-   { id: 'in_progress', name: 'In Progress', color: '#3B82F6', icon: InProgressIcon },
-   { id: 'done', name: 'Done', color: '#10B981', icon: CompletedIcon },
-   { id: 'cancelled', name: 'Cancelled', color: '#EF4444', icon: PausedIcon },
-];
 
 export default function AllIssues({
    showAllTags = false,
@@ -81,8 +86,15 @@ export default function AllIssues({
    tagName?: string;
 }) {
    const { isSearchOpen, searchQuery } = useSearchStore();
-   const { viewType } = useViewStore();
    const { hasActiveFilters } = useFilterStore();
+   const [viewType] = useQueryState('view', {
+      defaultValue: 'list',
+      parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+   });
+   const [active] = useQueryState('active', {
+      defaultValue: null,
+      parse: (value) => (value === 'true' ? true : null),
+   });
 
    // Use different hooks based on what we want to show
    const currentTagData = useCurrentTagWithTasks();
@@ -93,7 +105,14 @@ export default function AllIssues({
    let error: any;
    let tasks: TaskmasterTask[];
 
-   if (showAllTags) {
+   if (active) {
+      // Show current tag when active=true
+      isLoading = currentTagData.isLoading;
+      error = currentTagData.error;
+      const currentTag = currentTagData.currentTag;
+      // Add tagName to each task for proper identifier generation
+      tasks = currentTagData.tasks.map((task) => ({ ...task, tagName: currentTag }));
+   } else if (showAllTags) {
       // Show all tags
       isLoading = allTagsData.isLoading;
       error = allTagsData.error;
@@ -102,16 +121,19 @@ export default function AllIssues({
       // Show specific tag
       isLoading = specificTagData.isLoading;
       error = specificTagData.error;
-      tasks = specificTagData.data?.tasks || [];
+      // Add tagName to each task for proper identifier generation
+      tasks = (specificTagData.data?.tasks || []).map((task) => ({ ...task, tagName }));
    } else {
       // Show current tag
       isLoading = currentTagData.isLoading;
       error = currentTagData.error;
-      tasks = currentTagData.tasks;
+      const currentTag = currentTagData.currentTag;
+      // Add tagName to each task for proper identifier generation
+      tasks = currentTagData.tasks.map((task) => ({ ...task, tagName: currentTag }));
    }
 
    const isSearching = isSearchOpen && searchQuery.trim() !== '';
-   const isViewTypeGrid = viewType === 'grid';
+   const isViewTypeBoard = viewType === 'board';
    const isFiltering = hasActiveFilters();
 
    if (isLoading) {
@@ -127,19 +149,30 @@ export default function AllIssues({
    }
 
    return (
-      <div className={cn('w-full h-full', isViewTypeGrid && 'overflow-x-auto')}>
+      <div className={cn('w-full h-full', isViewTypeBoard && 'overflow-x-auto')}>
          {isSearching ? (
-            <SearchIssuesView tasks={tasks} />
+            <SearchIssuesView tasks={tasks} showAllTags={showAllTags} />
          ) : isFiltering ? (
-            <FilteredIssuesView isViewTypeGrid={isViewTypeGrid} tasks={tasks} />
+            <FilteredIssuesView
+               isViewTypeBoard={isViewTypeBoard}
+               tasks={tasks}
+               showAllTags={showAllTags}
+            />
          ) : (
-            <GroupIssuesListView isViewTypeGrid={isViewTypeGrid} tasks={tasks} />
+            <GroupIssuesListView
+               isViewTypeBoard={isViewTypeBoard}
+               tasks={tasks}
+               showAllTags={showAllTags}
+            />
          )}
       </div>
    );
 }
 
-const SearchIssuesView: FC<{ tasks: TaskmasterTask[] }> = ({ tasks }) => {
+const SearchIssuesView: FC<{ tasks: TaskmasterTask[]; showAllTags?: boolean }> = ({
+   tasks,
+   showAllTags,
+}) => {
    const { searchQuery } = useSearchStore();
 
    const searchResults = useMemo(() => {
@@ -166,7 +199,12 @@ const SearchIssuesView: FC<{ tasks: TaskmasterTask[] }> = ({ tasks }) => {
                         </div>
                         <div className="divide-y">
                            {issues.map((issue) => (
-                              <IssueLine key={issue.id} issue={issue} layoutId={false} />
+                              <IssueWithSubtasks
+                                 key={issue.id}
+                                 issue={issue}
+                                 layoutId={false}
+                                 showProjectBadge={showAllTags}
+                              />
                            ))}
                         </div>
                      </div>
@@ -183,9 +221,10 @@ const SearchIssuesView: FC<{ tasks: TaskmasterTask[] }> = ({ tasks }) => {
 };
 
 const FilteredIssuesView: FC<{
-   isViewTypeGrid: boolean;
+   isViewTypeBoard: boolean;
    tasks: TaskmasterTask[];
-}> = ({ isViewTypeGrid = false, tasks }) => {
+   showAllTags?: boolean;
+}> = ({ isViewTypeBoard = false, tasks, showAllTags }) => {
    const { filters } = useFilterStore();
 
    // Apply filters to tasks
@@ -233,7 +272,7 @@ const FilteredIssuesView: FC<{
    const filteredIssuesByStatus = useMemo(() => {
       const result: Record<string, Issue[]> = {};
 
-      taskmasterStatuses.forEach((statusItem) => {
+      TASKMASTER_STATUSES.forEach((statusItem) => {
          result[statusItem.id] = filteredIssues.filter(
             (issue) => issue.status.id === statusItem.id
          );
@@ -245,13 +284,14 @@ const FilteredIssuesView: FC<{
    return (
       <DndProvider backend={HTML5Backend}>
          <CustomDragLayer />
-         <div className={cn(isViewTypeGrid && 'flex h-full gap-3 px-2 py-2 min-w-max')}>
-            {taskmasterStatuses.map((statusItem) => (
+         <div className={cn(isViewTypeBoard && 'flex h-full gap-3 px-2 py-2 min-w-max')}>
+            {TASKMASTER_STATUSES.map((statusItem) => (
                <GroupIssues
                   key={statusItem.id}
                   status={statusItem}
                   issues={filteredIssuesByStatus[statusItem.id] || []}
                   count={filteredIssuesByStatus[statusItem.id]?.length || 0}
+                  showProjectBadge={showAllTags}
                />
             ))}
          </div>
@@ -260,15 +300,16 @@ const FilteredIssuesView: FC<{
 };
 
 const GroupIssuesListView: FC<{
-   isViewTypeGrid: boolean;
+   isViewTypeBoard: boolean;
    tasks: TaskmasterTask[];
-}> = ({ isViewTypeGrid = false, tasks }) => {
+   showAllTags?: boolean;
+}> = ({ isViewTypeBoard = false, tasks, showAllTags }) => {
    // Convert tasks to issues and group by status
    const issuesByStatus = useMemo(() => {
       const issues = tasks.map(taskToIssue);
       const result: Record<string, Issue[]> = {};
 
-      taskmasterStatuses.forEach((statusItem) => {
+      TASKMASTER_STATUSES.forEach((statusItem) => {
          result[statusItem.id] = issues.filter((issue) => issue.status.id === statusItem.id);
       });
 
@@ -278,13 +319,14 @@ const GroupIssuesListView: FC<{
    return (
       <DndProvider backend={HTML5Backend}>
          <CustomDragLayer />
-         <div className={cn(isViewTypeGrid && 'flex h-full gap-3 px-2 py-2 min-w-max')}>
-            {taskmasterStatuses.map((statusItem) => (
+         <div className={cn(isViewTypeBoard && 'flex h-full gap-3 px-2 py-2 min-w-max')}>
+            {TASKMASTER_STATUSES.map((statusItem) => (
                <GroupIssues
                   key={statusItem.id}
                   status={statusItem}
                   issues={issuesByStatus[statusItem.id] || []}
                   count={issuesByStatus[statusItem.id]?.length || 0}
+                  showProjectBadge={showAllTags}
                />
             ))}
          </div>

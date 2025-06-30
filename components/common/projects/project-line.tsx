@@ -5,11 +5,44 @@ import { LeadSelector } from './lead-selector';
 import { StatusWithPercent } from './status-with-percent';
 import { DatePicker } from './date-picker';
 
+interface ProjectWithStatus extends Project {
+   statusCounts: {
+      pending: number;
+      in_progress: number;
+      done: number;
+      cancelled: number;
+   };
+   totalTasks: number;
+}
+
 interface ProjectLineProps {
-   project: Project;
+   project: ProjectWithStatus;
 }
 
 export default function ProjectLine({ project }: ProjectLineProps) {
+   // Calculate percentage complete based on real task status
+   const percentComplete =
+      project.totalTasks > 0
+         ? Math.round((project.statusCounts.done / project.totalTasks) * 100)
+         : 0;
+
+   // Determine project status based on task statuses
+   const getProjectStatus = () => {
+      if (project.totalTasks === 0) return project.status;
+      if (project.statusCounts.done === project.totalTasks)
+         return { id: 'completed', name: 'Completed', color: '#8b5cf6', icon: project.status.icon };
+      if (project.statusCounts.in_progress > 0)
+         return {
+            id: 'in-progress',
+            name: 'In Progress',
+            color: '#facc15',
+            icon: project.status.icon,
+         };
+      if (project.statusCounts.cancelled === project.totalTasks)
+         return { id: 'paused', name: 'Paused', color: '#0ea5e9', icon: project.status.icon };
+      return { id: 'to-do', name: 'Todo', color: '#f97316', icon: project.status.icon };
+   };
+
    return (
       <div className="w-full flex items-center py-3 px-6 border-b hover:bg-sidebar/50 border-muted-foreground/5 text-sm">
          <div className="w-[60%] sm:w-[70%] xl:w-[46%] flex items-center gap-2">
@@ -39,7 +72,7 @@ export default function ProjectLine({ project }: ProjectLineProps) {
          </div>
 
          <div className="w-[20%] sm:w-[10%]">
-            <StatusWithPercent status={project.status} percentComplete={project.percentComplete} />
+            <StatusWithPercent status={getProjectStatus()} percentComplete={percentComplete} />
          </div>
       </div>
    );

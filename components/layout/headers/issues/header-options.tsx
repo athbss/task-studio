@@ -8,15 +8,19 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { useViewStore, ViewType } from '@/store/view-store';
+import { ViewType } from '@/store/view-store';
 import { LayoutGrid, LayoutList, SlidersHorizontal } from 'lucide-react';
 import { Filter } from './filter';
+import { useQueryState } from 'nuqs';
 
 export default function HeaderOptions() {
-   const { viewType, setViewType } = useViewStore();
+   const [view, setView] = useQueryState('view', {
+      defaultValue: 'list',
+      parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+   });
 
    const handleViewChange = (type: ViewType) => {
-      setViewType(type);
+      setView(type);
    };
 
    return (
@@ -27,7 +31,7 @@ export default function HeaderOptions() {
                <Button className="relative" size="xs" variant="secondary">
                   <SlidersHorizontal className="size-4 mr-1" />
                   Display
-                  {viewType === 'grid' && (
+                  {view === 'board' && (
                      <span className="absolute right-0 top-0 w-2 h-2 bg-orange-500 rounded-full" />
                   )}
                </Button>
@@ -37,17 +41,17 @@ export default function HeaderOptions() {
                   onClick={() => handleViewChange('list')}
                   className={cn(
                      'w-full text-xs border border-accent flex flex-col gap-1',
-                     viewType === 'list' ? 'bg-accent' : ''
+                     view === 'list' ? 'bg-accent' : ''
                   )}
                >
                   <LayoutList className="size-4" />
                   List
                </DropdownMenuItem>
                <DropdownMenuItem
-                  onClick={() => handleViewChange('grid')}
+                  onClick={() => handleViewChange('board')}
                   className={cn(
                      'w-full text-xs border border-accent flex flex-col gap-1',
-                     viewType === 'grid' ? 'bg-accent' : ''
+                     view === 'board' ? 'bg-accent' : ''
                   )}
                >
                   <LayoutGrid className="size-4" />

@@ -3,6 +3,11 @@ import { fetchTags, fetchTasksByTag } from '@/lib/api/taskmaster';
 import { TaskmasterTask } from '@/types/taskmaster';
 import { taskmasterKeys } from './use-taskmaster-queries';
 
+// Extended task type that includes tag information
+export interface TaskWithTag extends TaskmasterTask {
+   tagName: string;
+}
+
 // Hook to fetch all tasks from all tags
 export function useAllTasks() {
    return useQuery({
@@ -15,8 +20,8 @@ export function useAllTasks() {
          }
 
          // Then, fetch tasks for each tag
-         const allTasks: TaskmasterTask[] = [];
-         const tasksByTag: Record<string, TaskmasterTask[]> = {};
+         const allTasks: TaskWithTag[] = [];
+         const tasksByTag: Record<string, TaskWithTag[]> = {};
 
          for (const tag of tagsResult.data || []) {
             const tasksResult = await fetchTasksByTag(tag.name);

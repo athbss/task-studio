@@ -235,7 +235,7 @@
             "testStrategy": "Manual testing of store actions - verify openIssue sets selectedIssueId and isOpen to true, closeIssue resets selectedIssueId to null and isOpen to false. Test store subscription updates in React components.",
             "priority": "high",
             "dependencies": [],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -246,7 +246,7 @@
             "testStrategy": "Manual testing of modal open/close behaviors - ESC key, overlay click, X button. Verify focus management and that modal doesn't interfere with existing UI. Test keyboard accessibility and screen reader compatibility.",
             "priority": "high",
             "dependencies": [1],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -257,7 +257,7 @@
             "testStrategy": "Test with various task data structures including tasks with and without optional fields (assignee, labels, dueDate, details, testStrategy). Verify proper text formatting and responsive layout on different screen sizes.",
             "priority": "medium",
             "dependencies": [2],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -268,7 +268,7 @@
             "testStrategy": "Test task lookup with valid and invalid task IDs. Verify that modal displays correct task data and handles missing tasks gracefully. Test with different data sources (list view, board view) to ensure consistent data access.",
             "priority": "medium",
             "dependencies": [3],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -279,7 +279,7 @@
             "testStrategy": "Test clicking on task lines opens correct modal with right task data. Verify no conflicts with existing click handlers or interactive elements within the line component. Test keyboard navigation and accessibility.",
             "priority": "medium",
             "dependencies": [4],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -290,7 +290,7 @@
             "testStrategy": "Test clicking on task cards opens modal with correct task information. Verify proper interaction with any existing card functionality (drag/drop, etc.). Test responsive behavior and touch interactions on mobile devices.",
             "priority": "medium",
             "dependencies": [5],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -340,7 +340,7 @@
       ],
       "metadata": {
          "created": "2025-06-29T13:28:30.206Z",
-         "updated": "2025-06-29T13:29:34.349Z",
+         "updated": "2025-06-30T00:39:48.980Z",
          "description": "Tasks for issue-viewer context"
       }
    }

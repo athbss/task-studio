@@ -7,37 +7,80 @@ import { LabelBadge } from './label-badge';
 import { PrioritySelector } from './priority-selector';
 import { ProjectBadge } from './project-badge';
 import { StatusSelector } from './status-selector';
+import { SubtaskProgress } from './subtask-progress';
 import { motion } from 'motion/react';
+import { useIssueViewStore } from '@/store/issue-view-store';
+import { countSubtasks } from '@/lib/subtask-utils';
+import { cn } from '@/lib/utils';
 
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { IssueContextMenu } from './issue-context-menu';
 
-export function IssueLine({ issue, layoutId = false }: { issue: Issue; layoutId?: boolean }) {
+interface IssueLineProps {
+   issue: Issue & { isSubtask?: boolean; parentId?: string };
+   layoutId?: boolean;
+   showProjectBadge?: boolean;
+}
+
+export function IssueLine({ issue, layoutId = false, showProjectBadge = true }: IssueLineProps) {
+   const { openIssue } = useIssueViewStore();
+
+   // Count subtasks if they exist
+   const subtaskCount = issue.subtasks
+      ? countSubtasks({ subtasks: issue.subtasks } as any)
+      : { completed: 0, total: 0 };
+
+   const handleClick = (e: React.MouseEvent) => {
+      // Check if the click originated from an interactive element
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest(
+         'button, [role="button"], [role="combobox"], a, input, select, textarea'
+      );
+
+      if (!isInteractive) {
+         openIssue(issue.id);
+      }
+   };
+
    return (
       <ContextMenu>
          <ContextMenuTrigger asChild>
             <motion.div
                {...(layoutId && { layoutId: `issue-line-${issue.identifier}` })}
-               //href={`/lndev-ui/issue/${issue.identifier}`}
-               className="w-full flex items-center justify-start h-11 px-6 hover:bg-sidebar/50"
+               className={cn(
+                  'w-full flex items-center justify-start h-11 px-6 hover:bg-sidebar/50 cursor-pointer relative'
+               )}
+               onClick={handleClick}
             >
                <div className="flex items-center gap-0.5">
                   <PrioritySelector priority={issue.priority} issueId={issue.id} />
-                  <span className="text-sm hidden sm:inline-block text-muted-foreground font-medium w-[66px] truncate shrink-0 mr-0.5">
+                  <span className="text-sm hidden sm:inline-block text-muted-foreground font-medium w-[52px] truncate shrink-0 mr-0.5">
                      {issue.identifier}
                   </span>
                   <StatusSelector status={issue.status} issueId={issue.id} />
                </div>
                <span className="min-w-0 flex items-center justify-start mr-1 ml-0.5">
-                  <span className="text-xs sm:text-sm font-medium sm:font-semibold truncate">
+                  <span
+                     className={cn(
+                        'text-xs sm:text-sm font-medium sm:font-semibold truncate',
+                        issue.isSubtask && 'font-normal sm:font-normal'
+                     )}
+                  >
                      {issue.title}
                   </span>
                </span>
+               {subtaskCount.total > 0 && (
+                  <SubtaskProgress
+                     completed={subtaskCount.completed}
+                     total={subtaskCount.total}
+                     className="shrink-0 ml-1"
+                  />
+               )}
                <div className="flex items-center justify-end gap-2 ml-auto sm:w-fit">
                   <div className="w-3 shrink-0"></div>
                   <div className="-space-x-5 hover:space-x-1 lg:space-x-1 items-center justify-end hidden sm:flex duration-200 transition-all">
                      <LabelBadge label={issue.labels} />
-                     {issue.project && <ProjectBadge project={issue.project} />}
+                     {issue.project && showProjectBadge && <ProjectBadge project={issue.project} />}
                   </div>
                   <span className="text-xs text-muted-foreground shrink-0 hidden sm:inline-block">
                      {format(new Date(issue.createdAt), 'MMM dd')}

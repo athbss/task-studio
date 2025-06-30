@@ -1,7 +1,6 @@
 import {
    Inbox,
    FolderKanban,
-   ContactRound,
    Box,
    Settings,
    Bell,
@@ -23,8 +22,8 @@ export const inboxItems = [
       icon: Inbox,
    },
    {
-      name: 'My issues',
-      url: '#',
+      name: 'Active issues',
+      url: '/issues?active=true',
       icon: FolderKanban,
    },
 ];
@@ -32,17 +31,17 @@ export const inboxItems = [
 export const workspaceItems = [
    {
       name: 'All Issues',
-      url: '/lndev-ui/issues',
+      url: '/issues',
       icon: FolderKanban,
    },
    {
       name: 'Projects',
-      url: '/lndev-ui/projects',
+      url: '/projects',
       icon: Box,
    },
    {
       name: 'Members',
-      url: '/lndev-ui/members',
+      url: '/members',
       icon: UserRound,
    },
 ];

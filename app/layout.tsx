@@ -17,11 +17,11 @@ const siteUrl = 'https://circle.lndev.me';
 
 export const metadata: Metadata = {
    title: {
-      template: '%s | Circle by lndev-ui',
-      default: 'Circle by lndev-ui',
+      template: '%s | Taskmaster Circle',
+      default: 'Taskmaster Circle',
    },
    description:
-      'Project management interface inspired by Linear. Built with Next.js and shadcn/ui, this application allows tracking of issues, projects and teams with a modern, responsive UI.',
+      'A web-based interface for the Taskmaster CLI task management system. View and manage tasks from .taskmaster JSON files with real-time updates.',
    openGraph: {
       type: 'website',
       locale: 'en_US',
@@ -55,6 +55,8 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { NuqsProvider } from '@/components/providers/nuqs-provider';
+import { IssueViewModal } from '@/components/issue-view-modal';
 
 export default function RootLayout({
    children,
@@ -67,12 +69,15 @@ export default function RootLayout({
             <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
          </head>
          <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}>
-            <QueryProvider>
-               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-                  {children}
-                  <Toaster />
-               </ThemeProvider>
-            </QueryProvider>
+            <NuqsProvider>
+               <QueryProvider>
+                  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+                     {children}
+                     <IssueViewModal />
+                     <Toaster />
+                  </ThemeProvider>
+               </QueryProvider>
+            </NuqsProvider>
          </body>
       </html>
    );

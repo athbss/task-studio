@@ -20,12 +20,12 @@ export const statusUserColors = {
 export const users: User[] = [
    {
       id: 'dev',
-      name: 'Alex Chen',
-      avatarUrl: avatarUrl('alexchen'),
-      email: 'alex@taskmaster.dev',
+      name: 'Claude Code',
+      avatarUrl: avatarUrl('claudecode1'),
+      email: 'claude_code',
       status: 'online',
       role: 'Admin',
-      joinedDate: '2024-01-01',
+      joinedDate: '2025-01-01',
       teamIds: ['CLAUDE'],
    },
 ];

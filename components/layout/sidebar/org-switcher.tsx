@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ChevronsUpDown } from 'lucide-react';
+import { DEFAULT_ORG_NAME } from '@/lib/constants';
 
 import {
    DropdownMenu,
@@ -34,10 +35,10 @@ export function OrgSwitcher() {
                         className="h-8 p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                      >
                         <div className="flex aspect-square size-6 items-center justify-center rounded bg-orange-500 text-sidebar-primary-foreground">
-                           LN
+                           TM
                         </div>
                         <div className="grid flex-1 text-left text-sm leading-tight">
-                           <span className="truncate font-semibold">lndev-ui</span>
+                           <span className="truncate font-semibold">{DEFAULT_ORG_NAME}</span>
                         </div>
                         <ChevronsUpDown className="ml-auto" />
                      </SidebarMenuButton>
@@ -55,7 +56,7 @@ export function OrgSwitcher() {
                >
                   <DropdownMenuGroup>
                      <DropdownMenuItem asChild>
-                        <Link href="/lndev-ui/settings">
+                        <Link href="/settings">
                            Settings
                            <DropdownMenuShortcut>G then S</DropdownMenuShortcut>
                         </Link>
@@ -75,9 +76,9 @@ export function OrgSwitcher() {
                            <DropdownMenuSeparator />
                            <DropdownMenuItem>
                               <div className="flex aspect-square size-6 items-center justify-center rounded bg-orange-500 text-sidebar-primary-foreground">
-                                 LN
+                                 TM
                               </div>
-                              lndev-ui
+                              {DEFAULT_ORG_NAME}
                            </DropdownMenuItem>
                            <DropdownMenuSeparator />
                            <DropdownMenuItem>Create or join workspace</DropdownMenuItem>
