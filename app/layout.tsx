@@ -56,7 +56,6 @@ export const metadata: Metadata = {
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { NuqsProvider } from '@/components/providers/nuqs-provider';
-import { IssueViewModal } from '@/components/issue-view-modal';
 
 export default function RootLayout({
    children,
@@ -73,7 +72,6 @@ export default function RootLayout({
                <QueryProvider>
                   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                      {children}
-                     <IssueViewModal />
                      <Toaster />
                   </ThemeProvider>
                </QueryProvider>

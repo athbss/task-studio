@@ -301,7 +301,7 @@
             "testStrategy": "Verify action buttons are visually present but clearly indicated as inactive. Test Close button properly closes modal. Ensure button layout is responsive and follows existing design patterns. Test keyboard navigation through buttons.",
             "priority": "low",
             "dependencies": [6],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -312,7 +312,7 @@
             "testStrategy": "Visual testing across different screen sizes and task data variations. Verify consistent styling with rest of application. Test modal appearance with long text content, many labels, and minimal data. Check dark/light theme compatibility if applicable.",
             "priority": "medium",
             "dependencies": [7],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -323,24 +323,13 @@
             "testStrategy": "Test modal functionality from different pages and views in the application. Verify proper rendering order and z-index stacking. Test interaction with existing modals, dropdowns, or overlays. Ensure navigation and routing work correctly with modal open.",
             "priority": "medium",
             "dependencies": [8],
-            "status": "pending",
-            "subtasks": []
-         },
-         {
-            "id": 10,
-            "title": "Add Keyboard Shortcuts and Accessibility",
-            "description": "Implement comprehensive keyboard support and accessibility features for the issue viewer modal",
-            "details": "Implement ESC key to close modal, proper focus management when opening/closing, tab navigation through modal content, and ARIA attributes for screen readers. Add focus trap within modal and restore focus to triggering element on close. Ensure all interactive elements are keyboard accessible. Follow WCAG guidelines for modal accessibility.",
-            "testStrategy": "Test complete keyboard navigation - tab through all elements, ESC to close, focus management on open/close. Test with screen reader for proper announcements and navigation. Verify focus trap prevents focus from leaving modal. Test keyboard shortcuts don't conflict with browser or application shortcuts.",
-            "priority": "medium",
-            "dependencies": [9],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          }
       ],
       "metadata": {
          "created": "2025-06-29T13:28:30.206Z",
-         "updated": "2025-06-30T00:39:48.980Z",
+         "updated": "2025-06-30T00:51:37.929Z",
          "description": "Tasks for issue-viewer context"
       }
    }

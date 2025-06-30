@@ -34,7 +34,7 @@ export function GroupIssues({ status, issues, count, showProjectBadge }: GroupIs
    return (
       <div
          className={cn(
-            'bg-conainer',
+            'bg-container',
             isViewTypeBoard
                ? 'overflow-hidden rounded-md h-full flex-shrink-0 w-[348px] flex flex-col'
                : ''
@@ -48,12 +48,9 @@ export function GroupIssues({ status, issues, count, showProjectBadge }: GroupIs
          >
             <div
                className={cn(
-                  'w-full h-full flex items-center justify-between',
+                  'w-full h-full flex items-center justify-between bg-muted/50',
                   isViewTypeBoard ? 'px-3' : 'px-6'
                )}
-               style={{
-                  backgroundColor: isViewTypeBoard ? `${status.color}10` : `${status.color}08`,
-               }}
             >
                <div className="flex items-center gap-2">
                   <status.icon />

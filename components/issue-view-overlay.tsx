@@ -1,14 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useIssueViewStore } from '@/store/issue-view-store';
 import { TaskDetailsView } from '@/components/task-details-view';
 import { useAllTasks, TaskWithTag } from '@/hooks/use-all-tasks';
 import { useCurrentTagWithTasks } from '@/hooks/use-taskmaster-queries';
 
-export function IssueViewModal() {
-   const { isOpen, closeIssue, selectedIssueId } = useIssueViewStore();
+export function IssueViewOverlay() {
+   const { isOpen, selectedIssueId } = useIssueViewStore();
 
    // Get tasks from both sources to find the selected task
    const allTasksData = useAllTasks();
@@ -55,27 +54,27 @@ export function IssueViewModal() {
       return foundTask;
    }, [selectedIssueId, allTasksData.data, currentTagData.tasks, currentTagData.currentTag]);
 
+   if (!isOpen) return null;
+
    return (
-      <Dialog open={isOpen} onOpenChange={(open) => !open && closeIssue()}>
-         <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0 gap-0">
-            {task ? (
-               <TaskDetailsView task={task} />
-            ) : selectedIssueId ? (
-               <div className="flex items-center justify-center h-full text-muted-foreground">
-                  <div className="text-center">
-                     <p className="text-lg font-medium">Task not found</p>
-                     <p className="text-sm mt-2">The requested task could not be found.</p>
-                  </div>
+      <div className="absolute inset-0 z-50 bg-background flex flex-col">
+         {task ? (
+            <TaskDetailsView task={task} />
+         ) : selectedIssueId ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+               <div className="text-center">
+                  <p className="text-lg font-medium">Task not found</p>
+                  <p className="text-sm mt-2">The requested task could not be found.</p>
                </div>
-            ) : (
-               <div className="flex items-center justify-center h-full text-muted-foreground">
-                  <div className="text-center">
-                     <p className="text-lg font-medium">No task selected</p>
-                     <p className="text-sm mt-2">Please select a task to view its details.</p>
-                  </div>
+            </div>
+         ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+               <div className="text-center">
+                  <p className="text-lg font-medium">No task selected</p>
+                  <p className="text-sm mt-2">Please select a task to view its details.</p>
                </div>
-            )}
-         </DialogContent>
-      </Dialog>
+            </div>
+         )}
+      </div>
    );
 }
