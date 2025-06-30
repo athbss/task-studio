@@ -9,21 +9,55 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SubtaskProgress } from '@/components/common/issues/subtask-progress';
-import { PrioritySelector } from '@/components/common/issues/priority-selector';
 import { StatusSelector } from '@/components/common/issues/status-selector';
-import { AssigneeUser } from '@/components/common/issues/assignee-user';
+import { PrioritySelector } from '@/components/common/issues/priority-selector';
+import { AssigneeSelector } from '@/components/common/issues/assignee-selector';
+import { EstimateSelector } from '@/components/common/issues/estimate-selector';
 import { countSubtasks } from '@/lib/subtask-utils';
 import { Status } from '@/mock-data/status';
 import { Priority } from '@/mock-data/priorities';
 import { User } from '@/mock-data/users';
-import { Plus, ChevronRight, Triangle } from 'lucide-react';
+import {
+   Plus,
+   ChevronRight,
+   X,
+   ChevronUp,
+   ChevronDown,
+   MoreHorizontal,
+   Link,
+   GitBranch,
+} from 'lucide-react';
+import { useTaskViewUrl } from '@/hooks/use-task-view-url';
+import { extractTaskId } from '@/lib/task-id-utils';
+import { useAllTasks } from '@/hooks/use-all-tasks';
+import { useCurrentTagWithTasks } from '@/hooks/use-taskmaster-queries';
 
 interface TaskDetailsViewProps {
    task: TaskmasterTask | TaskWithTag;
 }
 
+// Generate tag prefix from tag name
+function getTagPrefix(tagName: string): string {
+   // Split by hyphens or spaces
+   const words = tagName.split(/[-\s]+/);
+
+   if (words.length > 1) {
+      // Use first letter of each word
+      return words.map((word) => word.charAt(0).toUpperCase()).join('');
+   } else {
+      // Single word: use first 2 letters
+      return tagName.substring(0, 2).toUpperCase();
+   }
+}
+
 export function TaskDetailsView({ task }: TaskDetailsViewProps) {
    const [isSubtasksExpanded, setIsSubtasksExpanded] = React.useState(true);
+   const [isDependenciesExpanded, setIsDependenciesExpanded] = React.useState(true);
+   const { openTask, closeTask } = useTaskViewUrl();
+
+   // Get all tasks and current tag tasks
+   const allTasksData = useAllTasks();
+   const currentTagData = useCurrentTagWithTasks();
 
    const statusInfo =
       TASKMASTER_STATUS_MAP[task.status as keyof typeof TASKMASTER_STATUS_MAP] ||
@@ -37,6 +71,137 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
 
    // Get tag name if available
    const tagName = 'tagName' in task ? task.tagName : 'master';
+
+   // Create a unique issue ID for the selectors
+   // For subtasks, we need to reconstruct the full path
+   const issueId = React.useMemo(() => {
+      // Check if this is a subtask that was loaded from the overlay
+      if ('_isSubtask' in task && (task as any)._isSubtask && 'parentId' in task) {
+         const parentId = (task as any).parentId;
+         const tagPrefix = 'tagName' in task && task.tagName ? `${task.tagName}-` : '';
+         return `${tagPrefix}${parentId}.${task.id}`;
+      }
+
+      // Regular task
+      return 'tagName' in task ? `${task.tagName}-${task.id}` : task.id.toString();
+   }, [task]);
+
+   // Check if this is a subtask by looking at the issueId format
+   const isSubtask = issueId.includes('.');
+
+   // Find current task position in the list
+   const { taskIndex, totalTasks, prevTaskId, nextTaskId } = React.useMemo(() => {
+      // If this is a subtask, navigate through parent task and its subtasks
+      if (isSubtask) {
+         // Parse the parent task ID and find parent task
+         const parentIdMatch = issueId.match(/^(.*?)(\d+)(\.\d+)+$/);
+         if (!parentIdMatch)
+            return { taskIndex: 0, totalTasks: 0, prevTaskId: null, nextTaskId: null };
+
+         const parentPrefix = parentIdMatch[1]; // e.g., "user-auth-" or ""
+         const parentNumericId = parseInt(parentIdMatch[2]);
+
+         // Find parent task
+         let parentTask: TaskmasterTask | TaskWithTag | null = null;
+         let taskList: Array<TaskmasterTask | TaskWithTag> = [];
+
+         // Get the appropriate task list based on context
+         if ('tagName' in task && task.tagName) {
+            taskList = allTasksData.data?.tasksByTag?.[task.tagName] || [];
+         } else {
+            taskList = currentTagData.tasks || [];
+         }
+
+         // Find parent task by numeric ID
+         parentTask = taskList.find((t) => t.id === parentNumericId) || null;
+
+         if (!parentTask) {
+            return { taskIndex: 0, totalTasks: 0, prevTaskId: null, nextTaskId: null };
+         }
+
+         // For subtasks, navigate through parent + all its subtasks as a flat list
+         const allTasksInParent: Array<{ id: string; title: string }> = [];
+
+         // Add parent task first
+         const parentId = parentPrefix + parentNumericId;
+         allTasksInParent.push({ id: parentId, title: parentTask.title });
+
+         // Add all subtasks recursively
+         const addSubtasksToList = (subtasks: any[], parentPath: string) => {
+            if (!subtasks) return;
+            subtasks.forEach((st: any) => {
+               const subtaskId = `${parentPath}.${st.id}`;
+               allTasksInParent.push({ id: subtaskId, title: st.title });
+               if (st.subtasks) {
+                  addSubtasksToList(st.subtasks, subtaskId);
+               }
+            });
+         };
+
+         if (parentTask.subtasks) {
+            addSubtasksToList(parentTask.subtasks, parentId);
+         }
+
+         // Find current task index in the flat list
+         const currentIndex = allTasksInParent.findIndex((t) => t.id === issueId);
+
+         return {
+            taskIndex: currentIndex >= 0 ? currentIndex + 1 : 0,
+            totalTasks: allTasksInParent.length,
+            prevTaskId: currentIndex > 0 ? allTasksInParent[currentIndex - 1].id : null,
+            nextTaskId:
+               currentIndex >= 0 && currentIndex < allTasksInParent.length - 1
+                  ? allTasksInParent[currentIndex + 1].id
+                  : null,
+         };
+      }
+
+      // For main tasks, navigate through the main task list
+      let taskList: Array<TaskmasterTask | TaskWithTag> = [];
+
+      // Get the appropriate task list based on whether we're showing all tags or a specific tag
+      if ('tagName' in task && task.tagName) {
+         // If task has tagName, get tasks from that specific tag
+         taskList = allTasksData.data?.tasksByTag?.[task.tagName] || [];
+      } else {
+         // Otherwise use current tag tasks
+         taskList = currentTagData.tasks || [];
+      }
+
+      // Find the index of the current task
+      const index = taskList.findIndex((t) => t.id === task.id);
+
+      return {
+         taskIndex: index >= 0 ? index + 1 : 0,
+         totalTasks: taskList.length,
+         prevTaskId:
+            index > 0
+               ? 'tagName' in taskList[index - 1]
+                  ? `${(taskList[index - 1] as TaskWithTag).tagName}-${taskList[index - 1].id}`
+                  : taskList[index - 1].id.toString()
+               : null,
+         nextTaskId:
+            index >= 0 && index < taskList.length - 1
+               ? 'tagName' in taskList[index + 1]
+                  ? `${(taskList[index + 1] as TaskWithTag).tagName}-${taskList[index + 1].id}`
+                  : taskList[index + 1].id.toString()
+               : null,
+      };
+   }, [task, issueId, isSubtask, allTasksData.data, currentTagData]);
+
+   // Generate task identifier - for subtasks, show the full path
+   const taskIdentifier = React.useMemo(() => {
+      if (isSubtask) {
+         // Extract the numeric part for subtasks
+         const numericPart = extractTaskId(issueId);
+         return tagName && tagName !== 'master'
+            ? `${getTagPrefix(tagName)}-${numericPart}`
+            : numericPart;
+      }
+      return tagName && tagName !== 'master'
+         ? `${getTagPrefix(tagName)}-${task.id}`
+         : task.id.toString();
+   }, [isSubtask, issueId, tagName, task.id]);
 
    // Convert to Status and Priority interfaces for selectors
    const statusObject: Status = {
@@ -66,14 +231,66 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
         }
       : null;
 
-   // Create a unique issue ID for the selectors
-   const issueId = 'tagName' in task ? `${task.tagName}-${task.id}` : task.id.toString();
-
    return (
       <div className="flex flex-1 overflow-hidden">
          {/* Main Content */}
-         <main className="flex-1 p-6 overflow-y-auto">
-            <div className="max-w-4xl">
+         <main className="flex-1 overflow-y-auto relative">
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-background border-b">
+               <div className="flex items-center justify-between px-6 py-3">
+                  <div className="flex items-center gap-4">
+                     {/* Task Identifier */}
+                     <h2 className="text-lg font-semibold">{taskIdentifier}</h2>
+
+                     {/* Options Menu */}
+                     <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                     </Button>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                     {/* Task Count */}
+                     {taskIndex > 0 && (
+                        <span className="text-sm text-muted-foreground">
+                           {taskIndex} / {totalTasks}
+                        </span>
+                     )}
+
+                     {/* Navigation Arrows */}
+                     <div className="flex items-center gap-1">
+                        <Button
+                           variant="ghost"
+                           size="icon"
+                           className="h-8 w-8"
+                           onClick={() => prevTaskId && openTask(prevTaskId)}
+                           disabled={!prevTaskId}
+                        >
+                           <ChevronUp className="h-4 w-4" />
+                           <span className="sr-only">Previous task</span>
+                        </Button>
+
+                        <Button
+                           variant="ghost"
+                           size="icon"
+                           className="h-8 w-8"
+                           onClick={() => nextTaskId && openTask(nextTaskId)}
+                           disabled={!nextTaskId}
+                        >
+                           <ChevronDown className="h-4 w-4" />
+                           <span className="sr-only">Next task</span>
+                        </Button>
+                     </div>
+
+                     {/* Close Button */}
+                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closeTask}>
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Close</span>
+                     </Button>
+                  </div>
+               </div>
+            </div>
+
+            <div className="max-w-4xl px-6 py-6">
                <h1 className="text-2xl font-semibold mb-4">{task.title}</h1>
 
                <p className="text-muted-foreground mb-8">
@@ -100,15 +317,22 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                   </div>
                )}
 
-               {/* Subtasks */}
-               {task.subtasks && task.subtasks.length > 0 && (
+               {/* Complexity Reasoning */}
+               {task.complexity?.reasoning && (
                   <div className="mb-8">
-                     <div className="flex items-center justify-between mb-4">
+                     <h3 className="text-sm font-medium mb-3">Complexity Analysis</h3>
+                     <p className="text-sm text-muted-foreground">{task.complexity.reasoning}</p>
+                  </div>
+               )}
+
+               {/* Subtasks */}
+               {task.subtasks && task.subtasks.length > 0 ? (
+                  <div className="mb-8">
+                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                            <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 w-6 p-0"
                               onClick={() => setIsSubtasksExpanded(!isSubtasksExpanded)}
                            >
                               <ChevronRight
@@ -117,8 +341,10 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                                     isSubtasksExpanded && 'rotate-90'
                                  )}
                               />
+                              <span className="font-medium text-sm text-muted-foreground">
+                                 Sub-tasks
+                              </span>
                            </Button>
-                           <span className="font-medium">Sub-tasks</span>
                            <SubtaskProgress
                               completed={subtaskCount.completed}
                               total={subtaskCount.total}
@@ -133,7 +359,7 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                      </div>
 
                      {isSubtasksExpanded && (
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                            {task.subtasks.map((subtask) => {
                               const subtaskStatus =
                                  TASKMASTER_STATUS_MAP[
@@ -150,24 +376,32 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                                  icon: subtaskStatus.icon,
                               };
 
-                              const subtaskId = `${issueId}-subtask-${subtask.id}`;
+                              // Create subtask ID using dot notation
+                              const parentNumericId = extractTaskId(issueId);
+                              const subtaskId = issueId.includes('-')
+                                 ? `${issueId.substring(0, issueId.lastIndexOf('-'))}-${parentNumericId}.${subtask.id}`
+                                 : `${parentNumericId}.${subtask.id}`;
 
                               return (
                                  <div
                                     key={subtask.id}
-                                    className="flex items-center gap-3 py-2 px-2 hover:bg-muted/50 rounded-md"
+                                    className="flex items-center gap-2 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer"
+                                    onClick={(e) => {
+                                       // Check if the click originated from an interactive element
+                                       const target = e.target as HTMLElement;
+                                       const isInteractive = target.closest(
+                                          'button, [role="button"], [role="combobox"]'
+                                       );
+                                       if (!isInteractive) {
+                                          openTask(subtaskId);
+                                       }
+                                    }}
                                  >
                                     <StatusSelector
                                        status={subtaskStatusObject}
                                        issueId={subtaskId}
                                     />
-                                    <span
-                                       className={cn(
-                                          'flex-1 text-sm',
-                                          subtask.status === 'done' &&
-                                             'line-through text-muted-foreground'
-                                       )}
-                                    >
+                                    <span className={cn('flex-1 text-sm font-medium')}>
                                        {subtask.title}
                                     </span>
                                     {subtask.priority && (
@@ -184,78 +418,217 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                         </div>
                      )}
                   </div>
+               ) : (
+                  // Show "Add sub-tasks" button when there are no subtasks and we have a recommendation
+                  (!task.subtasks || task.subtasks.length === 0) &&
+                  task.complexity?.recommendedSubtasks &&
+                  task.complexity.recommendedSubtasks > 0 && (
+                     <div className="mb-8">
+                        <Button
+                           variant="ghost"
+                           size="sm"
+                           className="w-full justify-start gap-2 h-auto py-2 px-3 items-start"
+                           onClick={() => {
+                              console.log(
+                                 `Add ${task.complexity?.recommendedSubtasks} subtasks to task ${task.id}`
+                              );
+                           }}
+                        >
+                           <Plus className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                           <div className="flex flex-col items-start gap-1 text-left">
+                              <span>Add sub-tasks ({task.complexity.recommendedSubtasks})</span>
+                              {task.complexity.expansionPrompt && (
+                                 <span className="text-xs text-muted-foreground whitespace-normal">
+                                    {task.complexity.expansionPrompt}
+                                 </span>
+                              )}
+                           </div>
+                        </Button>
+                     </div>
+                  )
                )}
 
                {/* Dependencies */}
                {task.dependencies && task.dependencies.length > 0 && (
                   <div className="mb-8">
-                     <h3 className="text-sm font-medium mb-3">Dependencies</h3>
-                     <div className="flex flex-wrap gap-2">
-                        {task.dependencies.map((dep) => (
-                           <Badge key={dep} variant="outline" className="text-xs">
-                              Task #{dep}
-                           </Badge>
-                        ))}
+                     <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                           <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setIsDependenciesExpanded(!isDependenciesExpanded)}
+                           >
+                              <ChevronRight
+                                 className={cn(
+                                    'h-4 w-4 transition-transform',
+                                    isDependenciesExpanded && 'rotate-90'
+                                 )}
+                              />
+                              <span className="font-medium text-sm text-muted-foreground">
+                                 Dependencies
+                              </span>
+                           </Button>
+                        </div>
                      </div>
+
+                     {isDependenciesExpanded && (
+                        <div className="space-y-0.5">
+                           {task.dependencies.map((dep) => {
+                              // Get the dependency task
+                              let depTask: TaskmasterTask | TaskWithTag | undefined;
+
+                              // Get the appropriate task list based on context
+                              if ('tagName' in task && task.tagName) {
+                                 const tagTasks = allTasksData.data?.tasksByTag?.[task.tagName];
+                                 depTask = tagTasks?.find((t) => {
+                                    // Convert dep to number for comparison since task IDs are numbers
+                                    return (
+                                       t.id === (typeof dep === 'string' ? parseInt(dep, 10) : dep)
+                                    );
+                                 });
+                              } else {
+                                 depTask = currentTagData.tasks?.find(
+                                    (t) =>
+                                       t.id === (typeof dep === 'string' ? parseInt(dep, 10) : dep)
+                                 );
+                              }
+
+                              if (!depTask) {
+                                 // Fallback if task not found
+                                 return (
+                                    <div
+                                       key={dep}
+                                       className="flex items-center gap-2 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer text-muted-foreground"
+                                       onClick={() => {
+                                          const depTaskId =
+                                             'tagName' in task && task.tagName
+                                                ? `${task.tagName}-${dep}`
+                                                : dep.toString();
+                                          openTask(depTaskId);
+                                       }}
+                                    >
+                                       <span className="text-sm">Task #{dep} (not found)</span>
+                                    </div>
+                                 );
+                              }
+
+                              // Create dependency task ID
+                              const depTaskId =
+                                 'tagName' in task && task.tagName
+                                    ? `${task.tagName}-${dep}`
+                                    : dep.toString();
+
+                              const depStatusInfo =
+                                 TASKMASTER_STATUS_MAP[
+                                    depTask.status as keyof typeof TASKMASTER_STATUS_MAP
+                                 ] || TASKMASTER_STATUS_MAP.pending;
+
+                              const depStatusObject: Status = {
+                                 id:
+                                    depTask.status === 'in-progress'
+                                       ? 'in_progress'
+                                       : depTask.status,
+                                 name: depStatusInfo.name,
+                                 color: depStatusInfo.color,
+                                 icon: depStatusInfo.icon,
+                              };
+
+                              return (
+                                 <div
+                                    key={dep}
+                                    className="flex items-center gap-2 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer"
+                                    onClick={(e) => {
+                                       // Check if the click originated from an interactive element
+                                       const target = e.target as HTMLElement;
+                                       const isInteractive = target.closest(
+                                          'button, [role="button"], [role="combobox"]'
+                                       );
+                                       if (!isInteractive) {
+                                          openTask(depTaskId);
+                                       }
+                                    }}
+                                 >
+                                    <StatusSelector status={depStatusObject} issueId={depTaskId} />
+                                    <span className={cn('flex-1 text-sm font-medium')}>
+                                       {depTask.title}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground font-mono">
+                                       {dep}
+                                    </span>
+                                 </div>
+                              );
+                           })}
+                        </div>
+                     )}
                   </div>
                )}
             </div>
          </main>
 
          {/* Properties Sidebar */}
-         <aside className="w-80 border-l p-6 overflow-y-auto">
-            <div className="space-y-6">
-               {/* Status */}
-               <div>
-                  <span className="text-xs font-medium text-muted-foreground">Status</span>
-                  <div className="mt-2">
+         <aside className="w-80 border-l overflow-y-auto">
+            <div className="p-6">
+               {/* Properties Header */}
+               <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-sm font-medium">Properties</h3>
+                  <Button
+                     variant="ghost"
+                     size="icon"
+                     className="h-6 w-6"
+                     onClick={() => {
+                        // Copy current URL to clipboard
+                        const url = window.location.href;
+                        navigator.clipboard.writeText(url);
+                     }}
+                  >
+                     <Link className="h-3 w-3" />
+                     <span className="sr-only">Copy task URL</span>
+                  </Button>
+               </div>
+
+               {/* Properties List */}
+               <div className="space-y-1">
+                  {/* Status */}
+                  <div className="flex items-center py-2">
+                     <StatusSelector status={statusObject} issueId={issueId} showLabel />
+                  </div>
+
+                  {/* Priority */}
+                  <div className="flex items-center py-2">
+                     <PrioritySelector priority={priorityObject} issueId={issueId} showLabel />
+                  </div>
+
+                  {/* Assignee */}
+                  <div className="flex items-center py-2">
+                     <AssigneeSelector user={assigneeUser} issueId={issueId} showLabel />
+                  </div>
+
+                  {/* Estimate / Complexity Score */}
+                  <div className="flex items-center py-2">
+                     <EstimateSelector
+                        estimate={task.complexity?.score}
+                        issueId={issueId}
+                        showLabel
+                     />
+                  </div>
+
+                  {/* Tag */}
+                  <div className="flex items-center py-2">
                      <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start gap-2 h-9 px-2"
+                        className="w-full justify-start gap-2 h-8 px-2 font-normal"
                      >
-                        <div className="h-4 w-4" style={{ color: statusInfo.color }}>
-                           <statusInfo.icon />
-                        </div>
-                        <span className="text-sm font-medium">{statusInfo.name}</span>
+                        <GitBranch className="h-4 w-4" />
+                        <span className="text-sm">{tagName}</span>
                      </Button>
                   </div>
                </div>
 
-               {/* Priority */}
-               <div>
-                  <span className="text-xs font-medium text-muted-foreground">Priority</span>
-                  <div className="mt-2">
-                     <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start gap-2 h-9 px-2"
-                     >
-                        <priority.icon className="h-4 w-4" />
-                        <span className="text-sm font-medium">{priority.name}</span>
-                     </Button>
-                  </div>
-               </div>
-
-               {/* Assignee */}
-               <div>
-                  <span className="text-xs font-medium text-muted-foreground">Assignee</span>
-                  <div className="mt-2 flex items-center gap-3">
-                     <AssigneeUser user={assigneeUser} />
-                     <span className="text-sm">{assigneeUser?.name || 'Unassigned'}</span>
-                  </div>
-               </div>
-
-               {/* Estimate */}
-               <div className="flex items-center gap-3 text-muted-foreground">
-                  <Triangle className="h-4 w-4" />
-                  <span>Set estimate</span>
-               </div>
-
-               {/* Labels */}
+               {/* Labels Section */}
                {task.labels && task.labels.length > 0 && (
-                  <div>
-                     <h3 className="font-medium mb-3">Labels</h3>
+                  <div className="mt-8">
+                     <h3 className="text-sm font-medium mb-3">Labels</h3>
                      <div className="flex flex-wrap gap-2">
                         {task.labels.map((label) => (
                            <Badge key={label} variant="secondary" className="text-xs">
@@ -265,17 +638,6 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                      </div>
                   </div>
                )}
-
-               {/* Project/Tag */}
-               <div>
-                  <h3 className="font-medium mb-3">Tag</h3>
-                  <div className="flex items-center gap-2">
-                     <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-background rounded-full" />
-                     </div>
-                     <span>{tagName}</span>
-                  </div>
-               </div>
             </div>
          </aside>
       </div>

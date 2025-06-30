@@ -1,7 +1,5 @@
 import {
-   Inbox,
    FolderKanban,
-   Box,
    Settings,
    Bell,
    KeyRound,
@@ -13,31 +11,27 @@ import {
    Clock,
    Zap,
    UserRound,
+   FocusIcon,
+   LayoutList,
 } from 'lucide-react';
 
-export const inboxItems = [
-   {
-      name: 'Inbox',
-      url: '#',
-      icon: Inbox,
-   },
-   {
-      name: 'Active issues',
-      url: '/issues?active=true',
-      icon: FolderKanban,
-   },
-];
+export const inboxItems = [];
 
 export const workspaceItems = [
    {
-      name: 'All Issues',
-      url: '/issues',
-      icon: FolderKanban,
+      name: 'Active issues',
+      url: '/issues?active=true',
+      icon: FocusIcon,
    },
    {
-      name: 'Projects',
-      url: '/projects',
-      icon: Box,
+      name: 'All issues',
+      url: '/issues',
+      icon: LayoutList,
+   },
+   {
+      name: 'Tags',
+      url: '/tags',
+      icon: Tag,
    },
    {
       name: 'Members',
@@ -86,9 +80,9 @@ export const featuresItems = [
       icon: Tag,
    },
    {
-      name: 'Projects',
-      url: '/settings/projects',
-      icon: Box,
+      name: 'Tags',
+      url: '/settings/tags',
+      icon: Tag,
    },
    {
       name: 'Initiatives',
@@ -98,7 +92,7 @@ export const featuresItems = [
    {
       name: 'Customer requests',
       url: '/settings/customer-requests',
-      icon: Inbox,
+      icon: MessageSquare,
    },
    {
       name: 'Templates',

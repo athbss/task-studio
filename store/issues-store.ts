@@ -1,7 +1,7 @@
 import { groupIssuesByStatus, Issue } from '@/mock-data/issues';
 import { LabelInterface } from '@/mock-data/labels';
 import { Priority } from '@/mock-data/priorities';
-import { Project } from '@/mock-data/projects';
+import { Tag } from '@/mock-data/tags';
 import { Status } from '@/mock-data/status';
 import { User } from '@/mock-data/users';
 import { create } from 'zustand';
@@ -11,7 +11,7 @@ interface FilterOptions {
    assignee?: string[];
    priority?: string[];
    labels?: string[];
-   project?: string[];
+   tag?: string[];
 }
 
 interface IssuesState {
@@ -32,7 +32,7 @@ interface IssuesState {
    filterByPriority: (priorityId: string) => Issue[];
    filterByAssignee: (userId: string | null) => Issue[];
    filterByLabel: (labelId: string) => Issue[];
-   filterByProject: (projectId: string) => Issue[];
+   filterByTag: (tagId: string) => Issue[];
    searchIssues: (query: string) => Issue[];
    filterIssues: (filters: FilterOptions) => Issue[];
 
@@ -49,8 +49,8 @@ interface IssuesState {
    addIssueLabel: (issueId: string, label: LabelInterface) => void;
    removeIssueLabel: (issueId: string, labelId: string) => void;
 
-   // Project management
-   updateIssueProject: (issueId: string, newProject: Project | undefined) => void;
+   // Tag management
+   updateIssueTag: (issueId: string, newTag: Tag | undefined) => void;
 
    // Utility functions
    getIssueById: (id: string) => Issue | undefined;
@@ -118,8 +118,8 @@ export const useIssuesStore = create<IssuesState>((set, get) => ({
       return get().issues.filter((issue) => issue.labels.some((label) => label.id === labelId));
    },
 
-   filterByProject: (projectId: string) => {
-      return get().issues.filter((issue) => issue.project?.id === projectId);
+   filterByTag: (tagId: string) => {
+      return get().issues.filter((issue) => issue.tag?.id === tagId);
    },
 
    searchIssues: (query: string) => {
@@ -169,10 +169,10 @@ export const useIssuesStore = create<IssuesState>((set, get) => ({
          );
       }
 
-      // Filter by project
-      if (filters.project && filters.project.length > 0) {
+      // Filter by tag
+      if (filters.tag && filters.tag.length > 0) {
          filteredIssues = filteredIssues.filter(
-            (issue) => issue.project && filters.project!.includes(issue.project.id)
+            (issue) => issue.tag && filters.tag!.includes(issue.tag.id)
          );
       }
 
@@ -211,9 +211,9 @@ export const useIssuesStore = create<IssuesState>((set, get) => ({
       }
    },
 
-   // Project management
-   updateIssueProject: (issueId: string, newProject: Project | undefined) => {
-      get().updateIssue(issueId, { project: newProject });
+   // Tag management
+   updateIssueTag: (issueId: string, newTag: Tag | undefined) => {
+      get().updateIssue(issueId, { tag: newTag });
    },
 
    // Utility functions

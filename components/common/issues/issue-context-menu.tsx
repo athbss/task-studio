@@ -32,6 +32,7 @@ import {
    FileText,
    MessageSquare,
    Clipboard,
+   GitBranch,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useIssuesStore } from '@/store/issues-store';
@@ -39,7 +40,7 @@ import { status } from '@/mock-data/status';
 import { priorities } from '@/mock-data/priorities';
 import { users } from '@/mock-data/users';
 import { labels } from '@/mock-data/labels';
-import { projects } from '@/mock-data/projects';
+import { tags } from '@/mock-data/tags';
 import { toast } from 'sonner';
 
 interface IssueContextMenuProps {
@@ -56,7 +57,7 @@ export function IssueContextMenu({ issueId }: IssueContextMenuProps) {
       updateIssueAssignee,
       addIssueLabel,
       removeIssueLabel,
-      updateIssueProject,
+      updateIssueTag,
       updateIssue,
       getIssueById,
    } = useIssuesStore();
@@ -104,11 +105,11 @@ export function IssueContextMenu({ issueId }: IssueContextMenuProps) {
       }
    };
 
-   const handleProjectChange = (projectId: string | null) => {
+   const handleTagChange = (tagId: string | null) => {
       if (!issueId) return;
-      const newProject = projectId ? projects.find((p) => p.id === projectId) : undefined;
-      updateIssueProject(issueId, newProject);
-      toast.success(newProject ? `Project set to ${newProject.name}` : 'Project removed');
+      const newTag = tagId ? tags.find((t) => t.id === tagId) : undefined;
+      updateIssueTag(issueId, newTag);
+      toast.success(newTag ? `Tag set to ${newTag.name}` : 'Tag removed');
    };
 
    const handleSetDueDate = () => {
@@ -237,18 +238,15 @@ export function IssueContextMenu({ issueId }: IssueContextMenuProps) {
 
             <ContextMenuSub>
                <ContextMenuSubTrigger>
-                  <Folder className="mr-2 size-4" /> Project
+                  <Folder className="mr-2 size-4" /> Tag
                </ContextMenuSubTrigger>
                <ContextMenuSubContent className="w-64">
-                  <ContextMenuItem onClick={() => handleProjectChange(null)}>
-                     <Folder className="size-4" /> No Project
+                  <ContextMenuItem onClick={() => handleTagChange(null)}>
+                     <Folder className="size-4" /> No Tag
                   </ContextMenuItem>
-                  {projects.slice(0, 5).map((project) => (
-                     <ContextMenuItem
-                        key={project.id}
-                        onClick={() => handleProjectChange(project.id)}
-                     >
-                        <project.icon className="size-4" /> {project.name}
+                  {tags.slice(0, 5).map((tag) => (
+                     <ContextMenuItem key={tag.id} onClick={() => handleTagChange(tag.id)}>
+                        <GitBranch className="size-4" /> {tag.name}
                      </ContextMenuItem>
                   ))}
                </ContextMenuSubContent>

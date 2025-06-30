@@ -3,7 +3,7 @@
 import { useCurrentTagWithTasks, useTasksByTag } from '@/hooks/use-taskmaster-queries';
 import { useAllTasks } from '@/hooks/use-all-tasks';
 import { TaskmasterTask } from '@/types/taskmaster';
-import { createProjectFromTag } from '@/mock-data/projects';
+import { createTagFromData } from '@/mock-data/tags';
 import { useQueryState } from 'nuqs';
 import { Priority } from '@/mock-data/priorities';
 import { TASKMASTER_STATUSES, TASKMASTER_STATUS_MAP } from '@/lib/taskmaster-constants';
@@ -70,7 +70,7 @@ function taskToIssue(task: TaskmasterTask & { tagName?: string }): Issue {
             name: label,
             color: '#8B5CF6',
          })) || [],
-      project: task.tagName ? createProjectFromTag(task.tagName, 0, undefined, 0) : undefined,
+      tag: task.tagName ? createTagFromData(task.tagName, 0, undefined, 0) : undefined,
       createdAt: new Date().toISOString(),
       cycleId: '1',
       rank: task.id.toString(),
@@ -90,10 +90,17 @@ export default function AllIssues({
    const [viewType] = useQueryState('view', {
       defaultValue: 'list',
       parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+      history: 'push',
    });
    const [active] = useQueryState('active', {
       defaultValue: null,
       parse: (value) => (value === 'true' ? true : null),
+      history: 'push',
+   });
+   const [issueFilter] = useQueryState('filter', {
+      defaultValue: 'all',
+      parse: (value) => (value === 'all' || value === 'active' ? value : 'all'),
+      history: 'push',
    });
 
    // Use different hooks based on what we want to show
@@ -130,6 +137,11 @@ export default function AllIssues({
       const currentTag = currentTagData.currentTag;
       // Add tagName to each task for proper identifier generation
       tasks = currentTagData.tasks.map((task) => ({ ...task, tagName: currentTag }));
+   }
+
+   // Apply issue filter
+   if (issueFilter === 'active') {
+      tasks = tasks.filter((task) => task.status === 'in-progress' || task.status === 'pending');
    }
 
    const isSearching = isSearchOpen && searchQuery.trim() !== '';
@@ -203,7 +215,7 @@ const SearchIssuesView: FC<{ tasks: TaskmasterTask[]; showAllTags?: boolean }> =
                                  key={issue.id}
                                  issue={issue}
                                  layoutId={false}
-                                 showProjectBadge={showAllTags}
+                                 showTagBadge={showAllTags}
                               />
                            ))}
                         </div>
@@ -291,7 +303,7 @@ const FilteredIssuesView: FC<{
                   status={statusItem}
                   issues={filteredIssuesByStatus[statusItem.id] || []}
                   count={filteredIssuesByStatus[statusItem.id]?.length || 0}
-                  showProjectBadge={showAllTags}
+                  showTagBadge={showAllTags}
                />
             ))}
          </div>
@@ -326,7 +338,7 @@ const GroupIssuesListView: FC<{
                   status={statusItem}
                   issues={issuesByStatus[statusItem.id] || []}
                   count={issuesByStatus[statusItem.id]?.length || 0}
-                  showProjectBadge={showAllTags}
+                  showTagBadge={showAllTags}
                />
             ))}
          </div>

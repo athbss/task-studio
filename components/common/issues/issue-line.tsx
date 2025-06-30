@@ -5,11 +5,11 @@ import { format } from 'date-fns';
 import { AssigneeUser } from './assignee-user';
 import { LabelBadge } from './label-badge';
 import { PrioritySelector } from './priority-selector';
-import { ProjectBadge } from './project-badge';
+import { TagBadge } from './tag-badge';
 import { StatusSelector } from './status-selector';
 import { SubtaskProgress } from './subtask-progress';
 import { motion } from 'motion/react';
-import { useIssueViewStore } from '@/store/issue-view-store';
+import { useTaskViewUrl } from '@/hooks/use-task-view-url';
 import { countSubtasks } from '@/lib/subtask-utils';
 import { cn } from '@/lib/utils';
 
@@ -19,11 +19,11 @@ import { IssueContextMenu } from './issue-context-menu';
 interface IssueLineProps {
    issue: Issue & { isSubtask?: boolean; parentId?: string };
    layoutId?: boolean;
-   showProjectBadge?: boolean;
+   showTagBadge?: boolean;
 }
 
-export function IssueLine({ issue, layoutId = false, showProjectBadge = true }: IssueLineProps) {
-   const { openIssue } = useIssueViewStore();
+export function IssueLine({ issue, layoutId = false, showTagBadge = true }: IssueLineProps) {
+   const { openTask } = useTaskViewUrl();
 
    // Count subtasks if they exist
    const subtaskCount = issue.subtasks
@@ -38,7 +38,7 @@ export function IssueLine({ issue, layoutId = false, showProjectBadge = true }: 
       );
 
       if (!isInteractive) {
-         openIssue(issue.id);
+         openTask(issue.id);
       }
    };
 
@@ -80,7 +80,7 @@ export function IssueLine({ issue, layoutId = false, showProjectBadge = true }: 
                   <div className="w-3 shrink-0"></div>
                   <div className="-space-x-5 hover:space-x-1 lg:space-x-1 items-center justify-end hidden sm:flex duration-200 transition-all">
                      <LabelBadge label={issue.labels} />
-                     {issue.project && showProjectBadge && <ProjectBadge project={issue.project} />}
+                     {issue.tag && showTagBadge && <TagBadge tag={issue.tag} />}
                   </div>
                   <span className="text-xs text-muted-foreground shrink-0 hidden sm:inline-block">
                      {format(new Date(issue.createdAt), 'MMM dd')}

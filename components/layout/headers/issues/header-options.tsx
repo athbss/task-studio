@@ -17,6 +17,7 @@ export default function HeaderOptions() {
    const [view, setView] = useQueryState('view', {
       defaultValue: 'list',
       parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+      history: 'push',
    });
 
    const handleViewChange = (type: ViewType) => {
@@ -31,9 +32,6 @@ export default function HeaderOptions() {
                <Button className="relative" size="xs" variant="secondary">
                   <SlidersHorizontal className="size-4 mr-1" />
                   Display
-                  {view === 'board' && (
-                     <span className="absolute right-0 top-0 w-2 h-2 bg-orange-500 rounded-full" />
-                  )}
                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-72 flex p-3 gap-2" align="end">

@@ -1,4 +1,4 @@
-import { Project, projects as defaultProjects } from './projects';
+import { Tag, tags as defaultTags } from './tags';
 import { User, users } from './users';
 
 export interface Team {
@@ -8,11 +8,11 @@ export interface Team {
    joined: boolean;
    color: string;
    members: User[];
-   projects: Project[];
+   tags: Tag[];
 }
 
-// Function to create teams with dynamic projects
-export function createTeamsWithProjects(projects: Project[]): Team[] {
+// Function to create teams with dynamic tags
+export function createTeamsWithTags(tags: Tag[]): Team[] {
    return [
       {
          id: 'TASKMASTER',
@@ -21,10 +21,10 @@ export function createTeamsWithProjects(projects: Project[]): Team[] {
          joined: true,
          color: '#8B5CF6',
          members: users,
-         projects: projects.length > 0 ? projects : defaultProjects,
+         tags: tags.length > 0 ? tags : defaultTags,
       },
    ];
 }
 
 // Default teams for fallback
-export const teams: Team[] = createTeamsWithProjects(defaultProjects);
+export const teams: Team[] = createTeamsWithTags(defaultTags);

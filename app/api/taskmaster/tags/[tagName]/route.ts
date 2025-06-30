@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { readJsonFile } from '@/utils/filesystem';
 
+interface ComplexityAnalysis {
+   taskId: number;
+   taskTitle: string;
+   complexityScore: number;
+   recommendedSubtasks: number;
+   expansionPrompt: string;
+   reasoning: string;
+}
+
+interface ComplexityReport {
+   meta: {
+      generatedAt: string;
+      tasksAnalyzed: number;
+      totalTasks: number;
+      analysisCount: number;
+      thresholdScore: number;
+      projectName: string;
+      usedResearch: boolean;
+   };
+   complexityAnalysis: ComplexityAnalysis[];
+}
+
 interface RouteParams {
    params: Promise<{
       tagName: string;
@@ -42,11 +64,52 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
          );
       }
 
+      // Try to load complexity report for this tag
+      let tasks = tagData.tasks || [];
+      try {
+         const reportPath = path.join(
+            process.cwd(),
+            '.taskmaster',
+            'reports',
+            `task-complexity-report_${tagName}.json`
+         );
+         const reportResult = await readJsonFile(reportPath);
+
+         if (reportResult.success && reportResult.data) {
+            const report = reportResult.data as ComplexityReport;
+            const complexityMap: Record<number, ComplexityAnalysis> = {};
+
+            // Index complexity analysis by task ID
+            report.complexityAnalysis.forEach((analysis) => {
+               complexityMap[analysis.taskId] = analysis;
+            });
+
+            // Merge complexity data into tasks
+            tasks = tasks.map((task: any) => {
+               const complexityAnalysis = complexityMap[task.id];
+               if (complexityAnalysis) {
+                  return {
+                     ...task,
+                     complexity: {
+                        score: complexityAnalysis.complexityScore,
+                        expansionPrompt: complexityAnalysis.expansionPrompt,
+                        reasoning: complexityAnalysis.reasoning,
+                        recommendedSubtasks: complexityAnalysis.recommendedSubtasks,
+                     },
+                  };
+               }
+               return task;
+            });
+         }
+      } catch {
+         // No complexity report found for this tag
+      }
+
       return NextResponse.json({
          success: true,
          data: {
             name: tagName,
-            tasks: tagData.tasks || [],
+            tasks,
             metadata: tagData.metadata || null,
          },
          timestamp: new Date().toISOString(),

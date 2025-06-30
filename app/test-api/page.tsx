@@ -30,7 +30,6 @@ export default function TestApiPage() {
             try {
                const debugResponse = await fetch('/api/taskmaster/debug');
                const debugData = await debugResponse.json();
-               console.log('Debug data:', debugData);
                setDebug(debugData);
             } catch (e) {
                console.error('Debug error:', e);
@@ -38,7 +37,6 @@ export default function TestApiPage() {
 
             // Test fetching tasks
             const tasksResult = await fetchTasks();
-            console.log('Tasks result:', tasksResult);
             if (tasksResult.success) {
                setTasks(tasksResult.data);
             } else {
@@ -48,7 +46,6 @@ export default function TestApiPage() {
 
             // Test fetching state
             const stateResult = await fetchState();
-            console.log('State result:', stateResult);
             if (stateResult.success) {
                setState(stateResult.data);
             } else {
@@ -58,7 +55,6 @@ export default function TestApiPage() {
 
             // Test fetching directories
             const dirResult = await fetchDirectories();
-            console.log('Directories result:', dirResult);
             if (dirResult.success) {
                setDirectories(dirResult.data);
             } else {
@@ -67,7 +63,6 @@ export default function TestApiPage() {
 
             // Test fetching tags
             const tagsResult = await fetchTags();
-            console.log('Tags result:', tagsResult);
             if (tagsResult.success) {
                setTags(tagsResult.data);
 
@@ -75,7 +70,6 @@ export default function TestApiPage() {
                if (tagsResult.data && tagsResult.data.length > 0) {
                   const firstTag = tagsResult.data[0].name;
                   const tagTasksResult = await fetchTasksByTag(firstTag);
-                  console.log(`Tasks for tag '${firstTag}':`, tagTasksResult);
                   if (tagTasksResult.success) {
                      setTagTasks(tagTasksResult.data);
                   }
@@ -86,7 +80,6 @@ export default function TestApiPage() {
 
             // Test fetching current tag
             const currentTagResult = await fetchCurrentTag();
-            console.log('Current tag result:', currentTagResult);
             if (currentTagResult.success) {
                setCurrentTag(currentTagResult.data);
             } else {

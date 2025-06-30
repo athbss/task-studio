@@ -2,12 +2,17 @@
 
 import * as React from 'react';
 import { useIssueViewStore } from '@/store/issue-view-store';
+import { useTaskViewUrl } from '@/hooks/use-task-view-url';
 import { TaskDetailsView } from '@/components/task-details-view';
 import { useAllTasks, TaskWithTag } from '@/hooks/use-all-tasks';
 import { useCurrentTagWithTasks } from '@/hooks/use-taskmaster-queries';
+import { parseTaskId, findTaskByPath, extractTaskId } from '@/lib/task-id-utils';
 
 export function IssueViewOverlay() {
    const { isOpen, selectedIssueId } = useIssueViewStore();
+
+   // Initialize URL sync
+   useTaskViewUrl();
 
    // Get tasks from both sources to find the selected task
    const allTasksData = useAllTasks();
@@ -17,37 +22,50 @@ export function IssueViewOverlay() {
    const task = React.useMemo(() => {
       if (!selectedIssueId) return null;
 
-      // Extract the tag name and numeric ID from the issue ID (format: "tagname-id" or just "id")
-      const idParts = selectedIssueId.split('-');
+      // Extract just the numeric ID (might include dots for subtasks)
+      const numericTaskId = extractTaskId(selectedIssueId);
+      const { taskId, subtaskPath } = parseTaskId(numericTaskId);
+
+      if (isNaN(taskId)) return null;
+
+      // Check if selectedIssueId includes tag name
       let tagName: string | null = null;
-      let numericId: number;
-
-      if (idParts.length > 1) {
-         // Format: "tagname-id"
+      if (selectedIssueId.includes('-') && !selectedIssueId.match(/^[\d.]+$/)) {
+         const idParts = selectedIssueId.split('-');
          tagName = idParts.slice(0, -1).join('-');
-         numericId = parseInt(idParts[idParts.length - 1]);
-      } else {
-         // Format: just "id"
-         numericId = parseInt(idParts[0]);
       }
-
-      if (isNaN(numericId)) return null;
 
       // First try to find in all tasks (which includes tag information)
       const allTasks = allTasksData.data?.allTasks || [];
       let foundTask: TaskWithTag | undefined = allTasks.find((t) => {
          if (tagName && t.tagName) {
-            return t.id === numericId && t.tagName === tagName;
+            return t.id === taskId && t.tagName === tagName;
          }
-         return t.id === numericId;
+         return t.id === taskId;
       });
 
       // If not found, try current tag tasks (without tagName)
       if (!foundTask) {
-         const currentTask = currentTagData.tasks.find((t) => t.id === numericId);
+         const currentTask = currentTagData.tasks.find((t) => t.id === taskId);
          if (currentTask) {
             // Add tagName from current tag for consistency
             foundTask = { ...currentTask, tagName: currentTagData.currentTag } as TaskWithTag;
+         }
+      }
+
+      // If we found the main task and need a subtask, traverse the subtask tree
+      if (foundTask && subtaskPath.length > 0) {
+         const subtask = findTaskByPath(foundTask, subtaskPath);
+         if (subtask) {
+            // Return the subtask with parent task info and proper tagName
+            const enhancedSubtask = {
+               ...subtask,
+               tagName: foundTask.tagName || currentTagData.currentTag,
+               parentId: foundTask.id,
+               _isSubtask: true,
+            } as TaskWithTag;
+
+            return enhancedSubtask;
          }
       }
 

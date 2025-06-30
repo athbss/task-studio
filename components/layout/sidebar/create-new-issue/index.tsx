@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { StatusSelector } from './status-selector';
 import { PrioritySelector } from './priority-selector';
 import { AssigneeSelector } from './assignee-selector';
-import { ProjectSelector } from './project-selector';
+import { TagSelector } from './tag-selector';
 import { LabelSelector } from './label-selector';
 import { ranks } from '@/mock-data/issues';
 import { DialogTitle } from '@radix-ui/react-dialog';
@@ -137,11 +137,9 @@ export function CreateNewIssue() {
                         setAddIssueForm({ ...addIssueForm, assignee: newAssignee })
                      }
                   />
-                  <ProjectSelector
-                     project={addIssueForm.project}
-                     onChange={(newProject) =>
-                        setAddIssueForm({ ...addIssueForm, project: newProject })
-                     }
+                  <TagSelector
+                     tag={addIssueForm.tag}
+                     onChange={(newTag) => setAddIssueForm({ ...addIssueForm, tag: newTag })}
                   />
                   <LabelSelector
                      selectedLabels={addIssueForm.labels}

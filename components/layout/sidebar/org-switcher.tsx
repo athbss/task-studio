@@ -1,15 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronsUpDown } from 'lucide-react';
-import { DEFAULT_ORG_NAME } from '@/lib/constants';
+import { ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { getProjectName } from '@/app/actions/taskmaster-config';
 
 import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuGroup,
    DropdownMenuItem,
-   DropdownMenuLabel,
    DropdownMenuPortal,
    DropdownMenuSeparator,
    DropdownMenuShortcut,
@@ -24,6 +23,11 @@ import { ThemeToggle } from '../theme-toggle';
 import Link from 'next/link';
 
 export function OrgSwitcher() {
+   const [projectName, setProjectName] = React.useState('');
+
+   React.useEffect(() => {
+      getProjectName().then(setProjectName);
+   }, []);
    return (
       <SidebarMenu>
          <SidebarMenuItem>
@@ -32,17 +36,19 @@ export function OrgSwitcher() {
                   <DropdownMenuTrigger asChild>
                      <SidebarMenuButton
                         size="lg"
-                        className="h-8 p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                        className="h-8 w-fit data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                      >
-                        <div className="flex aspect-square size-6 items-center justify-center rounded bg-orange-500 text-sidebar-primary-foreground">
+                        {/* <div className="flex aspect-square size-6 items-center justify-center rounded bg-primary text-xs text-sidebar-primary-foreground">
                            TM
+                        </div> */}
+                        <div className="grid text-left text-sm leading-tight">
+                           <span className="truncate font-semibold">{projectName}</span>
                         </div>
-                        <div className="grid flex-1 text-left text-sm leading-tight">
-                           <span className="truncate font-semibold">{DEFAULT_ORG_NAME}</span>
-                        </div>
-                        <ChevronsUpDown className="ml-auto" />
+                        <ChevronDown />
                      </SidebarMenuButton>
                   </DropdownMenuTrigger>
+
+                  <div className="flex-1" />
 
                   <ThemeToggle />
 
@@ -72,13 +78,11 @@ export function OrgSwitcher() {
                      <DropdownMenuSubTrigger>Switch Workspace</DropdownMenuSubTrigger>
                      <DropdownMenuPortal>
                         <DropdownMenuSubContent>
-                           <DropdownMenuLabel>leonelngoya@gmail.com</DropdownMenuLabel>
-                           <DropdownMenuSeparator />
                            <DropdownMenuItem>
-                              <div className="flex aspect-square size-6 items-center justify-center rounded bg-orange-500 text-sidebar-primary-foreground">
+                              {/* <div className="flex text-xs aspect-square size-6 items-center justify-center rounded bg-primary text-sidebar-primary-foreground">
                                  TM
-                              </div>
-                              {DEFAULT_ORG_NAME}
+                              </div> */}
+                              {projectName}
                            </DropdownMenuItem>
                            <DropdownMenuSeparator />
                            <DropdownMenuItem>Create or join workspace</DropdownMenuItem>
@@ -86,10 +90,6 @@ export function OrgSwitcher() {
                         </DropdownMenuSubContent>
                      </DropdownMenuPortal>
                   </DropdownMenuSub>
-                  <DropdownMenuItem>
-                     Log out
-                     <DropdownMenuShortcut>⌥⇧Q</DropdownMenuShortcut>
-                  </DropdownMenuItem>
                </DropdownMenuContent>
             </DropdownMenu>
          </SidebarMenuItem>

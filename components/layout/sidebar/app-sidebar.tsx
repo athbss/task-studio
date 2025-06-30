@@ -4,7 +4,6 @@ import { RiGithubLine } from '@remixicon/react';
 import * as React from 'react';
 
 import { HelpButton } from '@/components/layout/sidebar/help-button';
-import { NavInbox } from '@/components/layout/sidebar/nav-inbox';
 import { NavTags } from '@/components/layout/sidebar/nav-tags';
 import { NavWorkspace } from '@/components/layout/sidebar/nav-workspace';
 import { NavAccount } from '@/components/layout/sidebar/nav-account';
@@ -32,7 +31,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                </>
             ) : (
                <>
-                  <NavInbox />
                   <NavWorkspace />
                   <NavTags />
                </>

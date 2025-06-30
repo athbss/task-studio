@@ -1,0 +1,93 @@
+{
+   "meta": {
+      "generatedAt": "2025-06-30T16:15:53.033Z",
+      "tasksAnalyzed": 10,
+      "totalTasks": 10,
+      "analysisCount": 10,
+      "thresholdScore": 5,
+      "projectName": "Task Master",
+      "usedResearch": true
+   },
+   "complexityAnalysis": [
+      {
+         "taskId": 1,
+         "taskTitle": "Create File System Write Utilities",
+         "complexityScore": 4,
+         "recommendedSubtasks": 4,
+         "expansionPrompt": "Break down into: 1) Create atomic write function with temp files, 2) Implement file locking mechanism, 3) Add validation utilities, 4) Add comprehensive error handling",
+         "reasoning": "Well-defined utilities with clear requirements. Moderate complexity due to atomic operations and error handling needs."
+      },
+      {
+         "taskId": 2,
+         "taskTitle": "Implement Task Finding Logic",
+         "complexityScore": 5,
+         "recommendedSubtasks": 4,
+         "expansionPrompt": "Break down into: 1) Parse dot notation task IDs, 2) Implement recursive task finder, 3) Create update-in-place function, 4) Handle edge cases and validation",
+         "reasoning": "Requires recursive traversal and careful handling of nested structures. ID parsing adds complexity."
+      },
+      {
+         "taskId": 3,
+         "taskTitle": "Add Business Logic Validation",
+         "complexityScore": 6,
+         "recommendedSubtasks": 5,
+         "expansionPrompt": "Break down into: 1) Implement subtask completion checker, 2) Create status transition validator, 3) Add priority validation, 4) Add assignee validation, 5) Create detailed error message system",
+         "reasoning": "Multiple validation rules with interdependencies. Status transition logic and recursive subtask checking add complexity."
+      },
+      {
+         "taskId": 4,
+         "taskTitle": "Create Update Task API Endpoint",
+         "complexityScore": 7,
+         "recommendedSubtasks": 6,
+         "expansionPrompt": "Break down into: 1) Set up route handler structure, 2) Implement Zod schema validation, 3) Add file read/update logic, 4) Implement atomic write operation, 5) Add error handling and status codes, 6) Create response formatting",
+         "reasoning": "Full API endpoint with validation, file operations, and error handling. Integrates multiple previous components."
+      },
+      {
+         "taskId": 5,
+         "taskTitle": "Define TypeScript Interfaces and Schemas",
+         "complexityScore": 3,
+         "recommendedSubtasks": 3,
+         "expansionPrompt": "Break down into: 1) Define request/response interfaces, 2) Create Zod validation schemas, 3) Ensure type compatibility with existing types",
+         "reasoning": "Straightforward type definitions with clear requirements. Low complexity as it's mainly interface design."
+      },
+      {
+         "taskId": 6,
+         "taskTitle": "Create Tanstack Query Mutation Hook",
+         "complexityScore": 7,
+         "recommendedSubtasks": 5,
+         "expansionPrompt": "Break down into: 1) Set up basic mutation hook, 2) Implement optimistic updates, 3) Add rollback logic, 4) Implement cache invalidation, 5) Add error handling with toasts",
+         "reasoning": "Complex state management with optimistic updates, rollback, and cache management. Requires understanding of Tanstack Query patterns."
+      },
+      {
+         "taskId": 7,
+         "taskTitle": "Integrate Update Functionality with Existing Selectors",
+         "complexityScore": 5,
+         "recommendedSubtasks": 3,
+         "expansionPrompt": "Break down into: 1) Integrate with status selector, 2) Integrate with priority selector, 3) Integrate with assignee selector",
+         "reasoning": "Moderate complexity as it requires modifying existing components while maintaining their structure and adding new functionality."
+      },
+      {
+         "taskId": 8,
+         "taskTitle": "Add Error Toast Notifications",
+         "complexityScore": 3,
+         "recommendedSubtasks": 3,
+         "expansionPrompt": "Break down into: 1) Create error message mapping, 2) Integrate toast system, 3) Add retry functionality where appropriate",
+         "reasoning": "Relatively simple integration with existing toast system. Main complexity is in crafting user-friendly messages."
+      },
+      {
+         "taskId": 9,
+         "taskTitle": "Test Concurrent Update Scenarios",
+         "complexityScore": 8,
+         "recommendedSubtasks": 5,
+         "expansionPrompt": "Break down into: 1) Create concurrent update test setup, 2) Test file locking behavior, 3) Verify WebSocket synchronization, 4) Test data integrity, 5) Document limitations and edge cases",
+         "reasoning": "Complex testing scenario requiring simulation of concurrent operations and verification of system behavior under stress."
+      },
+      {
+         "taskId": 10,
+         "taskTitle": "Validate WebSocket Integration and Real-time Updates",
+         "complexityScore": 5,
+         "recommendedSubtasks": 4,
+         "expansionPrompt": "Break down into: 1) Test file watcher detection of API changes, 2) Verify WebSocket message propagation, 3) Test multi-tab synchronization, 4) Validate UI update consistency",
+         "reasoning": "Integration testing with existing WebSocket system. Complexity comes from verifying real-time behavior across multiple clients."
+      }
+   ]
+}

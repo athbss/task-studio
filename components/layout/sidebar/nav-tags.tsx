@@ -2,10 +2,10 @@
 
 import {
    Archive,
-   Box,
    ChevronRight,
    CopyMinus,
    GitBranch,
+   LayoutGrid,
    Link as LinkIcon,
    MoreHorizontal,
 } from 'lucide-react';
@@ -41,6 +41,7 @@ export function NavTags() {
    const [viewType, setViewType] = useQueryState('view', {
       defaultValue: 'list',
       parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+      history: 'push',
    });
 
    if (isLoading) {
@@ -77,7 +78,6 @@ export function NavTags() {
          <SidebarGroupLabel>Tags</SidebarGroupLabel>
          <SidebarMenu>
             {tagsData.map((tag) => {
-               const tagIcon = tag.name === 'master' ? '🏠' : '🏷️';
                const isCurrentTagPath = pathname === `/tag/${tag.name}`;
                const isTasksActive = isCurrentTagPath && viewType === 'list';
                const isBoardActive = isCurrentTagPath && viewType === 'board';
@@ -91,14 +91,15 @@ export function NavTags() {
                   >
                      <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
-                           <SidebarMenuButton tooltip={tag.name}>
-                              <div className="inline-flex size-6 bg-muted/50 items-center justify-center rounded shrink-0">
-                                 <div className="text-sm">{tagIcon}</div>
-                              </div>
-                              <span className="text-sm font-medium">
-                                 {tag.name === 'master' ? 'General' : tag.name}
+                           <SidebarMenuButton
+                              tooltip={tag.name}
+                              className="flex items-center gap-2"
+                           >
+                              <GitBranch className="size-4 shrink-0" />
+                              <span className="text-sm font-medium truncate flex-1 text-left">
+                                 {tag.name === 'master' ? 'main' : tag.name}
                               </span>
-                              <span className="ml-auto text-xs text-muted-foreground">
+                              <span className="ml-auto text-xs text-muted-foreground shrink-0">
                                  {tag.taskCount}
                               </span>
                               <span className="w-3 shrink-0">
@@ -121,7 +122,6 @@ export function NavTags() {
                                     <DropdownMenuItem
                                        onClick={() => {
                                           // In future: switch to this tag
-                                          console.log('Switch to tag:', tag.name);
                                        }}
                                     >
                                        <GitBranch className="size-4" />
@@ -169,7 +169,7 @@ export function NavTags() {
                                           }
                                        }}
                                     >
-                                       <Box size={14} />
+                                       <LayoutGrid size={14} />
                                        <span>Board</span>
                                     </Link>
                                  </SidebarMenuSubButton>

@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useIssueViewStore } from '@/store/issue-view-store';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -19,6 +19,8 @@ import {
    SlidersHorizontal,
    LayoutGrid,
    LayoutList,
+   ListTodo,
+   CircleDashed,
 } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
@@ -29,10 +31,10 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSearchStore } from '@/store/search-store';
-import Notifications from '@/components/layout/headers/issues/notifications';
 import { Filter } from '@/components/layout/headers/issues/filter';
-import { useCurrentTagWithTasks } from '@/hooks/use-taskmaster-queries';
+import { useCurrentTagWithTasks, useTags } from '@/hooks/use-taskmaster-queries';
 import { cn } from '@/lib/utils';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface HeaderConfig {
    title: string;
@@ -55,8 +57,19 @@ export function UnifiedHeader() {
    const [viewType, setViewType] = useQueryState('view', {
       defaultValue: 'list',
       parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+      history: 'push',
+   });
+   const [issueFilter, setIssueFilter] = useQueryState('filter', {
+      defaultValue: 'all',
+      parse: (value) => (value === 'all' || value === 'active' ? value : 'all'),
+      history: 'push',
    });
    const currentTagData = useCurrentTagWithTasks();
+   const { data: tagsData } = useTags();
+
+   // Local state for input value and debounced search
+   const [localSearchValue, setLocalSearchValue] = useState(searchQuery);
+   const debouncedSearchValue = useDebounce(localSearchValue, 300);
 
    // Search refs
    const searchInputRef = useRef<HTMLInputElement>(null);
@@ -67,6 +80,18 @@ export function UnifiedHeader() {
    const pathSegments = pathname.split('/');
    const isTagRoute = pathSegments[1] === 'tag';
    const currentTag = isTagRoute ? pathSegments[2] : null;
+
+   // Update search store when debounced value changes
+   useEffect(() => {
+      setSearchQuery(debouncedSearchValue);
+   }, [debouncedSearchValue, setSearchQuery]);
+
+   // Reset local value when searchQuery is cleared externally
+   useEffect(() => {
+      if (searchQuery === '' && localSearchValue !== '') {
+         setLocalSearchValue('');
+      }
+   }, [searchQuery, localSearchValue]);
 
    // Search effects
    useEffect(() => {
@@ -82,8 +107,9 @@ export function UnifiedHeader() {
             !searchContainerRef.current.contains(event.target as Node) &&
             isSearchOpen
          ) {
-            if (searchQuery.trim() === '') {
+            if (localSearchValue.trim() === '') {
                closeSearch();
+               setLocalSearchValue('');
             }
          }
       };
@@ -92,13 +118,13 @@ export function UnifiedHeader() {
       return () => {
          document.removeEventListener('mousedown', handleClickOutside);
       };
-   }, [isSearchOpen, closeSearch, searchQuery]);
+   }, [isSearchOpen, closeSearch, localSearchValue]);
 
    // Determine the current page
    const getPageType = () => {
       if (isIssueViewOpen) return 'issue-detail';
       if (pathname === '/issues') return 'issues';
-      if (pathname === '/projects') return 'projects';
+      if (pathname === '/tags') return 'tags';
       if (pathname === '/members') return 'members';
       if (pathname === '/settings') return 'settings';
       if (isTagRoute) return 'tag-issues';
@@ -127,14 +153,14 @@ export function UnifiedHeader() {
                showNotifications: true,
                showOptions: true,
             };
-         case 'projects':
+         case 'tags':
             return {
-               title: 'Projects',
+               title: 'Tags',
                showCount: true,
                actionButton: {
-                  label: 'Create project',
+                  label: 'Create tag',
                   icon: Plus,
-                  onClick: () => console.log('Create project'),
+                  onClick: () => {},
                },
                showOptions: true,
             };
@@ -145,7 +171,7 @@ export function UnifiedHeader() {
                actionButton: {
                   label: 'Invite',
                   icon: Users,
-                  onClick: () => console.log('Invite member'),
+                  onClick: () => {},
                },
                showOptions: true,
             };
@@ -194,7 +220,8 @@ export function UnifiedHeader() {
                      <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="text-xs font-mono">
-                     {currentTag?.toUpperCase() || 'MASTER'}-{currentTask.id}
+                     {currentTag?.toUpperCase() + '-' || ''}
+                     {currentTask.id}
                   </Badge>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                      <MoreHorizontal className="h-4 w-4" />
@@ -244,11 +271,11 @@ export function UnifiedHeader() {
                            <Input
                               type="search"
                               ref={searchInputRef}
-                              value={searchQuery}
+                              value={localSearchValue}
                               onChange={(e) => {
-                                 previousValueRef.current = searchQuery;
+                                 previousValueRef.current = localSearchValue;
                                  const newValue = e.target.value;
-                                 setSearchQuery(newValue);
+                                 setLocalSearchValue(newValue);
 
                                  if (previousValueRef.current && newValue === '') {
                                     const inputEvent = e.nativeEvent as InputEvent;
@@ -257,6 +284,7 @@ export function UnifiedHeader() {
                                        inputEvent.inputType !== 'deleteByCut'
                                     ) {
                                        closeSearch();
+                                       setLocalSearchValue('');
                                     }
                                  }
                               }}
@@ -264,10 +292,11 @@ export function UnifiedHeader() {
                               className="pl-8 h-7 text-sm"
                               onKeyDown={(e) => {
                                  if (e.key === 'Escape') {
-                                    if (searchQuery.trim() === '') {
+                                    if (localSearchValue.trim() === '') {
                                        closeSearch();
+                                       setLocalSearchValue('');
                                     } else {
-                                       setSearchQuery('');
+                                       setLocalSearchValue('');
                                     }
                                  }
                               }}
@@ -284,7 +313,7 @@ export function UnifiedHeader() {
                            >
                               <Search className="h-4 w-4" />
                            </Button>
-                           <Notifications />
+                           {/* <Notifications /> */}
                         </>
                      )}
                   </div>
@@ -297,10 +326,38 @@ export function UnifiedHeader() {
                         <span className="text-sm font-medium">{config.title}</span>
                         {config.showCount && (
                            <span className="text-xs bg-accent rounded-md px-1.5 py-1">
-                              {currentTagData.tasks.length}
+                              {pageType === 'tags'
+                                 ? tagsData?.length || 0
+                                 : issueFilter === 'active'
+                                   ? currentTagData.tasks.filter(
+                                        (t) => t.status === 'in-progress' || t.status === 'pending'
+                                     ).length
+                                   : currentTagData.tasks.length}
                            </span>
                         )}
                      </div>
+                     {(pageType === 'issues' || pageType === 'tag-issues') && (
+                        <div className="flex items-center gap-1 ml-4">
+                           <Button
+                              variant={issueFilter === 'all' ? 'default' : 'outline'}
+                              size="xs"
+                              onClick={() => setIssueFilter('all')}
+                              className="h-7 px-2"
+                           >
+                              <ListTodo className="h-4 w-4 mr-1" />
+                              All issues
+                           </Button>
+                           <Button
+                              variant={issueFilter === 'active' ? 'default' : 'outline'}
+                              size="xs"
+                              onClick={() => setIssueFilter('active')}
+                              className="h-7 px-2"
+                           >
+                              <CircleDashed className="h-4 w-4 mr-1" />
+                              Active
+                           </Button>
+                        </div>
+                     )}
                   </div>
                   <div className="flex items-center gap-2">
                      {config.actionButton && (
@@ -330,9 +387,6 @@ export function UnifiedHeader() {
                      <Button className="relative" size="xs" variant="secondary">
                         <SlidersHorizontal className="size-4 mr-1" />
                         Display
-                        {viewType === 'board' && (
-                           <span className="absolute right-0 top-0 w-2 h-2 bg-orange-500 rounded-full" />
-                        )}
                      </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-72 flex p-3 gap-2" align="end">

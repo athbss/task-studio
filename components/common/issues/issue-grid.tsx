@@ -9,16 +9,16 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { AssigneeUser } from './assignee-user';
 import { LabelBadge } from './label-badge';
 import { PrioritySelector } from './priority-selector';
-import { ProjectBadge } from './project-badge';
+import { TagBadge } from './tag-badge';
 import { StatusSelector } from './status-selector';
-import { useIssueViewStore } from '@/store/issue-view-store';
+import { useTaskViewUrl } from '@/hooks/use-task-view-url';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { IssueContextMenu } from './issue-context-menu';
 
 export const IssueDragType = 'ISSUE';
 type IssueGridProps = {
    issue: Issue;
-   showProjectBadge?: boolean;
+   showTagBadge?: boolean;
 };
 
 // Custom DragLayer component to render the drag preview
@@ -37,7 +37,7 @@ function IssueDragPreview({ issue }: { issue: Issue }) {
 
          <div className="flex flex-wrap gap-1.5 mb-3 min-h-[1.5rem]">
             <LabelBadge label={issue.labels} />
-            {issue.project && <ProjectBadge project={issue.project} />}
+            {issue.tag && <TagBadge tag={issue.tag} />}
          </div>
 
          <div className="flex items-center justify-between mt-auto pt-2">
@@ -76,9 +76,9 @@ export function CustomDragLayer() {
    );
 }
 
-export function IssueGrid({ issue, showProjectBadge = true }: IssueGridProps) {
+export function IssueGrid({ issue, showTagBadge = true }: IssueGridProps) {
    const ref = useRef<HTMLDivElement>(null);
-   const { openIssue } = useIssueViewStore();
+   const { openTask } = useTaskViewUrl();
 
    // Set up drag functionality.
    const [{ isDragging }, drag, preview] = useDrag(() => ({
@@ -111,7 +111,7 @@ export function IssueGrid({ issue, showProjectBadge = true }: IssueGridProps) {
 
       // Don't open modal if dragging or clicking on interactive elements
       if (!isDragging && !isInteractive) {
-         openIssue(issue.id);
+         openTask(issue.id);
       }
    };
 
@@ -140,7 +140,7 @@ export function IssueGrid({ issue, showProjectBadge = true }: IssueGridProps) {
                <h3 className="text-sm font-semibold mb-3 line-clamp-2">{issue.title}</h3>
                <div className="flex flex-wrap gap-1.5 mb-3 min-h-[1.5rem]">
                   <LabelBadge label={issue.labels} />
-                  {issue.project && showProjectBadge && <ProjectBadge project={issue.project} />}
+                  {issue.tag && showTagBadge && <TagBadge tag={issue.tag} />}
                </div>
                <div className="flex items-center justify-between mt-auto pt-2">
                   <span className="text-xs text-muted-foreground">

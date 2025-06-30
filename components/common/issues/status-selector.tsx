@@ -19,9 +19,10 @@ import { TASKMASTER_STATUSES } from '@/lib/taskmaster-constants';
 interface StatusSelectorProps {
    status: Status;
    issueId: string;
+   showLabel?: boolean;
 }
 
-export function StatusSelector({ status, issueId }: StatusSelectorProps) {
+export function StatusSelector({ status, issueId, showLabel = false }: StatusSelectorProps) {
    const id = useId();
    const [open, setOpen] = useState<boolean>(false);
    const [value, setValue] = useState<string>(status.id);
@@ -50,8 +51,12 @@ export function StatusSelector({ status, issueId }: StatusSelectorProps) {
             <PopoverTrigger asChild>
                <Button
                   id={id}
-                  className="size-7 flex items-center justify-center"
-                  size="icon"
+                  className={
+                     showLabel
+                        ? 'w-full justify-start gap-2 h-8 px-2 font-normal'
+                        : 'size-7 flex items-center justify-center'
+                  }
+                  size={showLabel ? 'sm' : 'icon'}
                   variant="ghost"
                   role="combobox"
                   aria-expanded={open}
@@ -60,7 +65,17 @@ export function StatusSelector({ status, issueId }: StatusSelectorProps) {
                      const selectedItem = TASKMASTER_STATUSES.find((item) => item.id === value);
                      if (selectedItem) {
                         const Icon = selectedItem.icon;
-                        return <Icon />;
+                        return (
+                           <>
+                              <div
+                                 className={showLabel ? 'h-4 w-4' : ''}
+                                 style={{ color: selectedItem.color }}
+                              >
+                                 <Icon />
+                              </div>
+                              {showLabel && <span className="text-sm">{selectedItem.name}</span>}
+                           </>
+                        );
                      }
                      return null;
                   })()}

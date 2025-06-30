@@ -1,33 +1,24 @@
 import { Status, status } from './status';
-import {
-   Blocks,
-   Bomb,
-   FormInput,
-   Globe,
-   HelpCircle,
-   LayoutDashboard,
-   Lock,
-   LucideIcon,
-   Play,
-   Settings,
-   Tag,
-   GitBranch,
-   Package,
-} from 'lucide-react';
-import { RemixiconComponentType } from '@remixicon/react';
 import { User, users } from './users';
 import { Priority, priorities } from './priorities';
 
-export interface Project {
+export interface Tag {
    id: string;
    name: string;
    status: Status;
-   icon: LucideIcon | RemixiconComponentType;
    percentComplete: number;
    startDate: string;
    lead: User;
    priority: Priority;
    health: Health;
+   taskCount?: number;
+   statusCounts?: {
+      pending: number;
+      in_progress: number;
+      done: number;
+      cancelled: number;
+   };
+   totalTasks?: number;
 }
 
 interface Health {
@@ -64,48 +55,19 @@ export const health: Health[] = [
    },
 ];
 
-// Helper function to get icon for tag name
-function getIconForTag(tagName: string): LucideIcon {
-   const iconMap: Record<string, LucideIcon> = {
-      'master': GitBranch,
-      'main': GitBranch,
-      'issue-viewer': FormInput,
-      'feature': Package,
-      'bug': Bomb,
-      'docs': HelpCircle,
-      'test': Play,
-      'ui': Blocks,
-      'api': Globe,
-      'auth': Lock,
-      'dashboard': LayoutDashboard,
-      'settings': Settings,
-   };
-
-   // Check if tag name contains any of the keywords
-   const tagLower = tagName.toLowerCase();
-   for (const [keyword, icon] of Object.entries(iconMap)) {
-      if (tagLower.includes(keyword)) {
-         return icon;
-      }
-   }
-
-   // Default icon
-   return Tag;
-}
-
-// Function to create project from Taskmaster tag data
-export function createProjectFromTag(
+// Function to create tag from Taskmaster tag data
+export function createTagFromData(
    tagName: string,
    taskCount: number,
    metadata?: any,
    index: number = 0
-): Project {
+): Tag {
    // Calculate completion percentage based on task statuses (if available)
    // For now, using a mock calculation
    const percentComplete = Math.floor(Math.random() * 100);
 
    // Select status based on some logic (could be based on task completion)
-   const projectStatus =
+   const tagStatus =
       percentComplete === 100
          ? status[5]
          : percentComplete > 80
@@ -119,7 +81,7 @@ export function createProjectFromTag(
                  : status[0];
 
    // Determine health based on various factors
-   const projectHealth =
+   const tagHealth =
       percentComplete > 70
          ? health[2] // on-track
          : percentComplete > 40
@@ -132,32 +94,32 @@ export function createProjectFromTag(
       id: tagName,
       name:
          tagName === 'master'
-            ? 'General'
+            ? 'Main'
             : tagName
                  .split('-')
                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                  .join(' '),
-      status: projectStatus,
-      icon: getIconForTag(tagName),
+      status: tagStatus,
       percentComplete,
       startDate: metadata?.created || new Date().toISOString().split('T')[0],
       lead: users[0], // Default to first user
       priority: priorities[index % priorities.length],
-      health: projectHealth,
+      health: tagHealth,
+      taskCount,
    };
 }
 
-// Export a function that can be used to get projects from actual tags
-export function getProjectsFromTags(
-   tags: Array<{ name: string; taskCount: number; metadata?: any }>
-): Project[] {
-   return tags.map((tag, index) =>
-      createProjectFromTag(tag.name, tag.taskCount, tag.metadata, index)
+// Export a function that can be used to get tags from actual tag data
+export function getTagsFromData(
+   tagsData: Array<{ name: string; taskCount: number; metadata?: any }>
+): Tag[] {
+   return tagsData.map((tag, index) =>
+      createTagFromData(tag.name, tag.taskCount, tag.metadata, index)
    );
 }
 
-// Default mock projects for fallback/demo purposes
-export const projects: Project[] = [
-   createProjectFromTag('master', 8, { created: '2025-03-01' }, 0),
-   createProjectFromTag('issue-viewer', 10, { created: '2025-03-08' }, 1),
+// Default mock tags for fallback/demo purposes
+export const tags: Tag[] = [
+   createTagFromData('master', 8, { created: '2025-03-01' }, 0),
+   createTagFromData('issue-viewer', 10, { created: '2025-03-08' }, 1),
 ];

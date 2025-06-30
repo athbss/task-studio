@@ -18,9 +18,10 @@ import { useEffect, useId, useState } from 'react';
 interface PrioritySelectorProps {
    priority: Priority;
    issueId?: string;
+   showLabel?: boolean;
 }
 
-export function PrioritySelector({ priority, issueId }: PrioritySelectorProps) {
+export function PrioritySelector({ priority, issueId, showLabel = false }: PrioritySelectorProps) {
    const id = useId();
    const [open, setOpen] = useState<boolean>(false);
    const [value, setValue] = useState<string>(priority.id);
@@ -49,8 +50,12 @@ export function PrioritySelector({ priority, issueId }: PrioritySelectorProps) {
             <PopoverTrigger asChild>
                <Button
                   id={id}
-                  className="size-7 flex items-center justify-center"
-                  size="icon"
+                  className={
+                     showLabel
+                        ? 'w-full justify-start gap-2 h-8 px-2 font-normal'
+                        : 'size-7 flex items-center justify-center'
+                  }
+                  size={showLabel ? 'sm' : 'icon'}
                   variant="ghost"
                   role="combobox"
                   aria-expanded={open}
@@ -59,7 +64,14 @@ export function PrioritySelector({ priority, issueId }: PrioritySelectorProps) {
                      const selectedItem = priorities.find((item) => item.id === value);
                      if (selectedItem) {
                         const Icon = selectedItem.icon;
-                        return <Icon className="text-muted-foreground size-4" />;
+                        return (
+                           <>
+                              <Icon
+                                 className={showLabel ? 'h-4 w-4' : 'text-muted-foreground size-4'}
+                              />
+                              {showLabel && <span className="text-sm">{selectedItem.name}</span>}
+                           </>
+                        );
                      }
                      return null;
                   })()}

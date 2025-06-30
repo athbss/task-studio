@@ -1,9 +1,9 @@
 'use client';
 
-import ProjectLine from '@/components/common/projects/project-line';
+import TagLine from '@/components/common/tags/tag-line';
 import { useTags } from '@/hooks/use-taskmaster-queries';
 import { useAllTasks } from '@/hooks/use-all-tasks';
-import { createProjectFromTag } from '@/mock-data/projects';
+import { createTagFromData } from '@/mock-data/tags';
 import { useMemo } from 'react';
 import { TaskmasterTask } from '@/types/taskmaster';
 
@@ -11,11 +11,11 @@ interface TaskWithTag extends TaskmasterTask {
    tagName: string;
 }
 
-export default function Projects() {
+export default function Tags() {
    const { data: tagsData, isLoading: tagsLoading } = useTags();
    const { data: allTasksData, isLoading: tasksLoading } = useAllTasks();
 
-   const projects = useMemo(() => {
+   const tags = useMemo(() => {
       if (!tagsData || !allTasksData) return [];
 
       return tagsData.map((tag, index) => {
@@ -34,17 +34,17 @@ export default function Projects() {
             cancelled: tagTasks.filter((t) => t.status === 'cancelled').length,
          };
 
-         // Create project with real status
-         const project = createProjectFromTag(tag.name, tag.taskCount, tag.metadata, index);
+         // Create tag with real status
+         const tagData = createTagFromData(tag.name, tag.taskCount, tag.metadata, index);
 
          // Calculate health based on task progress
-         const getProjectHealth = () => {
+         const getTagHealth = () => {
             if (tagTasks.length === 0) {
                return {
                   id: 'no-update' as const,
                   name: 'No Update',
                   color: '#94A3B8',
-                  description: 'No tasks in this project yet',
+                  description: 'No tasks in this tag yet',
                };
             }
 
@@ -92,8 +92,8 @@ export default function Projects() {
 
          // Add real status information
          return {
-            ...project,
-            health: getProjectHealth(),
+            ...tagData,
+            health: getTagHealth(),
             statusCounts,
             totalTasks: tagTasks.length,
          };
@@ -101,14 +101,12 @@ export default function Projects() {
    }, [tagsData, allTasksData]);
 
    if (tagsLoading || tasksLoading) {
-      return (
-         <div className="w-full h-full flex items-center justify-center">Loading projects...</div>
-      );
+      return <div className="w-full h-full flex items-center justify-center">Loading tags...</div>;
    }
    return (
       <div className="w-full">
          <div className="bg-container px-6 py-1.5 text-sm flex items-center text-muted-foreground border-b sticky top-0 z-10">
-            <div className="w-[60%] sm:w-[70%] xl:w-[46%]">Title</div>
+            <div className="w-[60%] sm:w-[70%] xl:w-[46%]">Name</div>
             <div className="w-[20%] sm:w-[10%] xl:w-[13%] pl-2.5">Health</div>
             <div className="hidden w-[10%] sm:block pl-2">Priority</div>
             <div className="hidden xl:block xl:w-[13%] pl-2">Lead</div>
@@ -117,8 +115,8 @@ export default function Projects() {
          </div>
 
          <div className="w-full">
-            {projects.map((project) => (
-               <ProjectLine key={project.id} project={project} />
+            {tags.map((tag) => (
+               <TagLine key={tag.id} tag={tag} />
             ))}
          </div>
       </div>

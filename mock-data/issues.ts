@@ -1,7 +1,7 @@
 import { LexoRank } from '@/lib/utils';
 import { LabelInterface } from './labels';
 import { Priority } from './priorities';
-import { Project } from './projects';
+import { Tag } from './tags';
 import { Status } from './status';
 import { User } from './users';
 
@@ -16,7 +16,7 @@ export interface Issue {
    labels: LabelInterface[];
    createdAt: string;
    cycleId: string;
-   project?: Project;
+   tag?: Tag;
    subissues?: string[];
    rank: string;
    dueDate?: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Layers, LayoutList, MoreHorizontal } from 'lucide-react';
+import { ChartScatter, CircuitBoard, Layers, LayoutList, MoreHorizontal } from 'lucide-react';
 
 import {
    DropdownMenu,
@@ -47,12 +47,8 @@ export function NavWorkspace() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48 rounded-lg" side="bottom" align="start">
                      <DropdownMenuItem>
-                        <RiPresentationLine className="text-muted-foreground" />
-                        <span>Initiatives</span>
-                     </DropdownMenuItem>
-                     <DropdownMenuItem>
-                        <Layers className="text-muted-foreground" />
-                        <span>Views</span>
+                        <CircuitBoard className="text-muted-foreground" />
+                        <span>Reports</span>
                      </DropdownMenuItem>
                      <DropdownMenuSeparator />
                      <DropdownMenuItem>

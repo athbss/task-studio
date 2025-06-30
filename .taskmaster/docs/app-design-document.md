@@ -1,8 +1,8 @@
-# Taskmaster Circle - Application Design Document
+# Task UI - Application Design Document
 
 ## Introduction
 
-Taskmaster Circle is a web-based visualization and management interface for the Taskmaster CLI task management system. It transforms the command-line experience of Taskmaster into an intuitive, visual interface that provides real-time insights into task organization, progress, and relationships while maintaining the simplicity and power of the underlying CLI tool.
+Task UI is a web-based visualization and management interface for the Taskmaster CLI task management system. It transforms the command-line experience of Taskmaster into an intuitive, visual interface that provides real-time insights into task organization, progress, and relationships while maintaining the simplicity and power of the underlying CLI tool.
 
 ### Application Purpose
 
@@ -27,7 +27,7 @@ Taskmaster Circle is a web-based visualization and management interface for the 
 
 ### Business Context
 
-Taskmaster Circle serves as a companion tool to Taskmaster CLI, similar to how Prisma Studio complements Prisma CLI. It aims to lower the barrier to entry for visual thinkers while maintaining the power user features that make Taskmaster effective for complex project management.
+Task UI serves as a companion tool to Taskmaster CLI, similar to how Prisma Studio complements Prisma CLI. It aims to lower the barrier to entry for visual thinkers while maintaining the power user features that make Taskmaster effective for complex project management.
 
 ## Core Features
 
@@ -130,7 +130,7 @@ Taskmaster Circle serves as a companion tool to Taskmaster CLI, similar to how P
 
 1. **Morning Task Review**
 
-   - Open Taskmaster Circle
+   - Open Task UI
    - View current tag context tasks
    - Filter by "in-progress" status
    - Identify next task to work on
@@ -334,7 +334,7 @@ Taskmaster Circle serves as a companion tool to Taskmaster CLI, similar to how P
 
 ### Long-term Vision
 
-Taskmaster Circle aims to become the definitive visual interface for Taskmaster, eventually supporting:
+Task UI aims to become the definitive visual interface for Taskmaster, eventually supporting:
 
 - Desktop application via Electron/Tauri
 - Cloud sync for team collaboration

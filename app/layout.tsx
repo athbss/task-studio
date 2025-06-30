@@ -17,8 +17,8 @@ const siteUrl = 'https://circle.lndev.me';
 
 export const metadata: Metadata = {
    title: {
-      template: '%s | Taskmaster Circle',
-      default: 'Taskmaster Circle',
+      template: '%s | Task UI',
+      default: 'Task UI',
    },
    description:
       'A web-based interface for the Taskmaster CLI task management system. View and manage tasks from .taskmaster JSON files with real-time updates.',
@@ -26,36 +26,21 @@ export const metadata: Metadata = {
       type: 'website',
       locale: 'en_US',
       url: siteUrl,
-      siteName: 'Circle',
-      images: [
-         {
-            url: `${siteUrl}/banner.png`,
-            width: 2560,
-            height: 1440,
-            alt: 'lndev/ui',
-         },
-      ],
+      siteName: 'Task UI',
    },
    twitter: {
       card: 'summary_large_image',
-      site: '@ln_dev7',
-      creator: '@ln_dev7',
-      images: [
-         {
-            url: `${siteUrl}/banner.png`,
-            width: 2560,
-            height: 1440,
-            alt: 'Circle',
-         },
-      ],
+      site: '@zbeyens',
+      creator: '@zbeyens',
    },
-   authors: [{ name: 'Leonel NGOYA', url: 'https://lndev.me/' }],
-   keywords: ['ui', 'lndev', 'components', 'template'],
+   authors: [{ name: 'zbeyens', url: 'https://x.com/zbeyens' }],
+   keywords: ['ui', 'taskmaster', 'shadcn', 'template'],
 };
 
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { NuqsProvider } from '@/components/providers/nuqs-provider';
+import { TaskmasterWebSocketProvider } from '@/components/providers/taskmaster-websocket-provider';
 
 export default function RootLayout({
    children,
@@ -71,7 +56,7 @@ export default function RootLayout({
             <NuqsProvider>
                <QueryProvider>
                   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-                     {children}
+                     <TaskmasterWebSocketProvider>{children}</TaskmasterWebSocketProvider>
                      <Toaster />
                   </ThemeProvider>
                </QueryProvider>

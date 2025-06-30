@@ -332,5 +332,124 @@
          "updated": "2025-06-30T00:51:37.929Z",
          "description": "Tasks for issue-viewer context"
       }
+   },
+   "taskmaster-update-api": {
+      "tasks": [
+         {
+            "id": 1,
+            "title": "Create File System Write Utilities",
+            "description": "Implement atomic file writing utilities for safe JSON file operations",
+            "details": "Create `/utils/filesystem.ts` with functions: `writeJsonFile()` for atomic file writing using temporary files, `acquireFileLock()` for simple file locking (last-write-wins approach), and `validateTaskUpdate()` for input validation. Use Node.js `fs` module with `fs.writeFileSync()` to write to temporary file first, then rename to target file for atomicity. Include error handling for file system operations and JSON serialization.",
+            "testStrategy": "Test concurrent write operations, verify file integrity after writes, test error scenarios like permission denied and disk full, validate temporary file cleanup on success and failure",
+            "priority": "high",
+            "dependencies": [],
+            "status": "in-progress",
+            "subtasks": []
+         },
+         {
+            "id": 2,
+            "title": "Implement Task Finding Logic",
+            "description": "Create utilities to locate and access tasks within nested tag hierarchies",
+            "details": "Add functions to `/lib/taskmaster-service.ts`: `findTaskInTag()` to locate task by ID within specific tag context, supporting nested subtask IDs like '1.2.1'. Implement `updateTaskInPlace()` to modify task while preserving structure. Handle dot notation parsing for subtask IDs and recursive traversal of task hierarchies. Support both main tasks and nested subtasks.",
+            "testStrategy": "Test finding tasks with various ID formats (1, 1.2, 1.2.1), verify correct task modification preserves other fields, test edge cases like non-existent tasks and invalid IDs",
+            "priority": "high",
+            "dependencies": [1],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 3,
+            "title": "Add Business Logic Validation",
+            "description": "Implement validation rules for task state transitions and data integrity",
+            "details": "Create validation functions in `/lib/taskmaster-service.ts`: `hasIncompletSubtasks()` to check if task has pending subtasks, preventing marking parent as done with incomplete children. Validate status transitions (any status can go to cancelled, standard flow: pending → in_progress → done). Validate priority values against enum (low, medium, high, urgent). Validate assignee as string or empty. Return detailed error messages for validation failures.",
+            "testStrategy": "Test status transition rules, verify subtask completion validation, test priority value validation, test assignee validation, verify detailed error messages for each validation failure",
+            "priority": "high",
+            "dependencies": [2],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 4,
+            "title": "Create Update Task API Endpoint",
+            "description": "Build POST endpoint at /api/taskmaster/tasks/update for task modifications",
+            "details": "Create `/app/api/taskmaster/tasks/update/route.ts` with POST handler. Accept request body with tag, taskId, and updates object containing status, priority, and/or assignee. Use Zod schema validation for input. Read current tasks.json, find and update specified task, write back atomically. Return UpdateTaskResponse with success boolean, updated task data, error message, and timestamp. Handle all error cases with appropriate HTTP status codes.",
+            "testStrategy": "Test API endpoint with valid requests, test input validation with invalid data, test error responses for non-existent tasks, verify atomic file operations, test concurrent API calls",
+            "priority": "high",
+            "dependencies": [3],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 5,
+            "title": "Define TypeScript Interfaces and Schemas",
+            "description": "Create type definitions and Zod schemas for API request/response validation",
+            "details": "Define UpdateTaskRequest interface with tag (string), taskId (string), and updates object containing optional status, priority, assignee fields. Define UpdateTaskResponse interface with success boolean, optional data (TaskmasterTask), optional error string, and timestamp. Create corresponding Zod schemas for runtime validation. Ensure compatibility with existing TaskmasterTask, TaskStatus, and Priority types.",
+            "testStrategy": "Validate schema parsing with valid and invalid inputs, test type compatibility with existing interfaces, verify error messages from schema validation",
+            "priority": "medium",
+            "dependencies": [],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 6,
+            "title": "Create Tanstack Query Mutation Hook",
+            "description": "Implement React hook for optimistic task updates with error handling",
+            "details": "Create `useUpdateTask()` mutation hook in `/hooks/use-taskmaster-queries.ts`. Implement optimistic updates that immediately update UI before server confirmation. Use Tanstack Query's `useMutation` with `onMutate` for optimistic updates, `onError` for rollback with toast notification, and `onSuccess` for cache invalidation. Include proper TypeScript typing and error handling.",
+            "testStrategy": "Test optimistic updates work immediately, verify rollback on API errors, test cache invalidation on success, verify toast notifications for errors, test loading states",
+            "priority": "high",
+            "dependencies": [4, 5],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 7,
+            "title": "Integrate Update Functionality with Existing Selectors",
+            "description": "Connect update mutations to existing status, priority, and assignee selector components",
+            "details": "Modify existing selector components (status-selector.tsx, priority-selector.tsx, assignee-selector.tsx) to use the `useUpdateTask()` hook. Add onClick handlers that trigger mutations when values change. Ensure components show loading states during updates and handle errors gracefully. Maintain existing UI patterns and component structure without creating new components.",
+            "testStrategy": "Test each selector triggers updates correctly, verify loading states display properly, test error handling in UI components, ensure existing functionality remains unchanged",
+            "priority": "medium",
+            "dependencies": [6],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 8,
+            "title": "Add Error Toast Notifications",
+            "description": "Implement user-friendly error notifications for failed update operations",
+            "details": "Integrate toast notifications for update failures using existing toast system. Display clear, actionable error messages for common scenarios like validation failures and file system errors. Include retry functionality where appropriate. Ensure toast messages are user-friendly and not technical error codes.",
+            "testStrategy": "Test toast notifications appear for various error scenarios, verify message clarity and usefulness, test retry functionality if implemented, ensure toasts don't interfere with UI",
+            "priority": "medium",
+            "dependencies": [6],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 9,
+            "title": "Test Concurrent Update Scenarios",
+            "description": "Validate system behavior with multiple simultaneous task updates",
+            "details": "Test scenarios with multiple users or browser tabs updating tasks simultaneously. Verify file locking works correctly and last-write-wins behavior is acceptable. Test WebSocket synchronization ensures all clients receive updates. Verify no data corruption occurs during concurrent operations. Document any limitations or edge cases discovered.",
+            "testStrategy": "Simulate concurrent updates from multiple browser tabs, test file system integrity under load, verify WebSocket updates propagate correctly, test recovery from failed writes",
+            "priority": "medium",
+            "dependencies": [7, 8],
+            "status": "pending",
+            "subtasks": []
+         },
+         {
+            "id": 10,
+            "title": "Validate WebSocket Integration and Real-time Updates",
+            "description": "Ensure existing WebSocket system properly handles and propagates task updates",
+            "details": "Verify that when tasks.json file is updated via API, the existing file watcher detects changes and triggers WebSocket notifications to all connected clients. Test that UI updates in real-time across multiple browser windows/tabs. Ensure no additional WebSocket changes are needed since file watcher should detect API-driven file changes automatically.",
+            "testStrategy": "Test real-time updates across multiple browser tabs, verify file watcher detects API changes, test WebSocket message propagation, ensure UI stays synchronized across clients",
+            "priority": "medium",
+            "dependencies": [9],
+            "status": "pending",
+            "subtasks": []
+         }
+      ],
+      "metadata": {
+         "created": "2025-06-30T16:12:43.811Z",
+         "updated": "2025-06-30T18:17:30.205Z",
+         "description": "Tasks for taskmaster-update-api context"
+      }
    }
 }

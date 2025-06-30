@@ -19,13 +19,14 @@ interface GroupIssuesProps {
    status: Status;
    issues: Issue[];
    count: number;
-   showProjectBadge?: boolean;
+   showTagBadge?: boolean;
 }
 
-export function GroupIssues({ status, issues, count, showProjectBadge }: GroupIssuesProps) {
+export function GroupIssues({ status, issues, count, showTagBadge }: GroupIssuesProps) {
    const [viewType] = useQueryState('view', {
       defaultValue: 'list',
       parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
+      history: 'push',
    });
    const isViewTypeBoard = viewType === 'board';
    const { openModal } = useCreateIssueStore();
@@ -79,21 +80,21 @@ export function GroupIssues({ status, issues, count, showProjectBadge }: GroupIs
                      key={issue.id}
                      issue={issue}
                      layoutId={true}
-                     showProjectBadge={showProjectBadge}
+                     showTagBadge={showTagBadge}
                   />
                ))}
             </div>
          ) : (
-            <IssueGridList issues={issues} status={status} showProjectBadge={showProjectBadge} />
+            <IssueGridList issues={issues} status={status} showTagBadge={showTagBadge} />
          )}
       </div>
    );
 }
 
-const IssueGridList: FC<{ issues: Issue[]; status: Status; showProjectBadge?: boolean }> = ({
+const IssueGridList: FC<{ issues: Issue[]; status: Status; showTagBadge?: boolean }> = ({
    issues,
    status,
-   showProjectBadge,
+   showTagBadge,
 }) => {
    const ref = useRef<HTMLDivElement>(null);
    const { updateIssueStatus } = useIssuesStore();
@@ -140,7 +141,7 @@ const IssueGridList: FC<{ issues: Issue[]; status: Status; showProjectBadge?: bo
             )}
          </AnimatePresence>
          {sortedIssues.map((issue) => (
-            <IssueGrid key={issue.id} issue={issue} showProjectBadge={showProjectBadge} />
+            <IssueGrid key={issue.id} issue={issue} showTagBadge={showTagBadge} />
          ))}
       </div>
    );

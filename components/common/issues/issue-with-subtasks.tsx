@@ -8,7 +8,7 @@ import { TASKMASTER_STATUS_MAP } from '@/lib/taskmaster-constants';
 interface IssueWithSubtasksProps {
    issue: Issue;
    layoutId?: boolean;
-   showProjectBadge?: boolean;
+   showTagBadge?: boolean;
    indentLevel?: number;
 }
 
@@ -25,8 +25,14 @@ function subtaskToIssue(subtask: TaskmasterTask, parentIssue: Issue, index: numb
    // Convert Taskmaster status to UI status id
    const statusId = subtask.status === 'in-progress' ? 'in_progress' : subtask.status;
 
+   // Extract numeric parent ID and create proper subtask ID
+   const parentNumericId = parentIssue.id.split('-').pop() || parentIssue.id;
+   const subtaskId = `${parentNumericId}.${subtask.id}`;
+
    return {
-      id: `${parentIssue.id}-sub-${subtask.id}`,
+      id: parentIssue.id.includes('-')
+         ? `${parentIssue.id.substring(0, parentIssue.id.lastIndexOf('-'))}-${subtaskId}`
+         : subtaskId,
       identifier: `${parentIssue.identifier}.${subtask.id}`,
       title: subtask.title,
       description: subtask.description || '',
@@ -49,7 +55,7 @@ function subtaskToIssue(subtask: TaskmasterTask, parentIssue: Issue, index: numb
             name: label,
             color: '#8B5CF6',
          })) || [],
-      project: parentIssue.project,
+      tag: parentIssue.tag,
       createdAt: parentIssue.createdAt,
       cycleId: parentIssue.cycleId,
       rank: `${parentIssue.rank}.${index}`,
@@ -62,7 +68,7 @@ function subtaskToIssue(subtask: TaskmasterTask, parentIssue: Issue, index: numb
 export function IssueWithSubtasks({
    issue,
    layoutId = false,
-   showProjectBadge = true,
+   showTagBadge = true,
    indentLevel = 0,
 }: IssueWithSubtasksProps) {
    const hasSubtasks = issue.subtasks && issue.subtasks.length > 0;
@@ -70,7 +76,7 @@ export function IssueWithSubtasks({
    return (
       <>
          {/* Parent issue */}
-         <IssueLine issue={issue} layoutId={layoutId} showProjectBadge={showProjectBadge} />
+         <IssueLine issue={issue} layoutId={layoutId} showTagBadge={showTagBadge} />
 
          {/* Subtasks - no indentation, just visual indicators */}
          {hasSubtasks && (
@@ -83,7 +89,7 @@ export function IssueWithSubtasks({
                         key={subtaskIssue.id}
                         issue={subtaskIssue}
                         layoutId={false}
-                        showProjectBadge={false}
+                        showTagBadge={false}
                         indentLevel={indentLevel + 1}
                      />
                   );

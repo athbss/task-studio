@@ -1,3 +1,10 @@
+export interface TaskComplexity {
+   score: number;
+   expansionPrompt: string;
+   reasoning: string;
+   recommendedSubtasks: number;
+}
+
 export interface TaskmasterTask {
    id: number;
    title: string;
@@ -11,6 +18,7 @@ export interface TaskmasterTask {
    dueDate?: string;
    details?: string;
    testStrategy?: string;
+   complexity?: TaskComplexity;
 }
 
 export interface TagContext {
