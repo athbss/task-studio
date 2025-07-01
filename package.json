@@ -1,6 +1,6 @@
 {
    "name": "task-studio",
-   "version": "0.1.1-beta.14",
+   "version": "0.1.1",
    "description": "Web-based UI for Taskmaster task management system",
    "keywords": [
       "taskmaster",
