@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       try {
          const fileContent = await fs.readFile(tasksPath, 'utf-8');
          tasksData = JSON.parse(fileContent);
-      } catch (error) {
+      } catch {
          return NextResponse.json<UpdateTaskResponse>(
             {
                success: false,
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
          const tempPath = `${tasksPath}.tmp`;
          await fs.writeFile(tempPath, JSON.stringify(tasksData, null, 2));
          await fs.rename(tempPath, tasksPath);
-      } catch (error) {
+      } catch {
          return NextResponse.json<UpdateTaskResponse>(
             {
                success: false,
