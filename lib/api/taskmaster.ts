@@ -190,3 +190,34 @@ export async function fetchConfig(): Promise<ApiResponse<TaskmasterConfig>> {
       };
    }
 }
+
+/**
+ * Updates a task
+ */
+export async function updateTask(params: {
+   tag: string;
+   taskId: string;
+   updates: {
+      status?: string;
+      priority?: string;
+      assignee?: string;
+   };
+}): Promise<ApiResponse<any>> {
+   try {
+      const response = await fetch(`${API_BASE}/tasks/update`, {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+         },
+         body: JSON.stringify(params),
+      });
+      const data = await response.json();
+      return data;
+   } catch (error) {
+      return {
+         success: false,
+         error: error instanceof Error ? error.message : 'Failed to update task',
+         timestamp: new Date().toISOString(),
+      };
+   }
+}

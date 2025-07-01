@@ -1,4 +1,4 @@
-import { TaskmasterTask } from '@/types/taskmaster';
+import { TaskmasterTask, TaskStatus, TaskPriority } from '@/types/taskmaster';
 
 /**
  * Parses a task ID string into its components
@@ -157,4 +157,126 @@ export function flattenTasks(
    });
 
    return result;
+}
+
+/**
+ * Checks if a task has incomplete subtasks
+ * Returns true if any subtask is not in 'done' or 'cancelled' status
+ */
+export function hasIncompleteSubtasks(task: TaskmasterTask): boolean {
+   if (!task.subtasks || task.subtasks.length === 0) {
+      return false;
+   }
+
+   return task.subtasks.some((subtask) => {
+      // Check if this subtask is incomplete
+      if (subtask.status !== 'done' && subtask.status !== 'cancelled') {
+         return true;
+      }
+      // Recursively check if this subtask has incomplete subtasks
+      return hasIncompleteSubtasks(subtask);
+   });
+}
+
+/**
+ * Validates a status transition
+ * Returns an error message if invalid, null if valid
+ */
+export function validateStatusTransition(
+   currentStatus: TaskStatus,
+   newStatus: TaskStatus
+): string | null {
+   // Any status can transition to cancelled
+   if (newStatus === 'cancelled') {
+      return null;
+   }
+
+   // Standard flow: pending → in_progress → done
+   const validTransitions: Record<TaskStatus, TaskStatus[]> = {
+      'pending': ['in_progress', 'in-progress', 'done'],
+      'in_progress': ['done', 'pending'],
+      'in-progress': ['done', 'pending'], // Handle both formats
+      'done': ['pending', 'in_progress', 'in-progress'], // Allow reopening tasks
+      'cancelled': ['pending'], // Allow reactivating cancelled tasks
+   };
+
+   const allowedTransitions = validTransitions[currentStatus];
+   if (!allowedTransitions.includes(newStatus)) {
+      return `Invalid status transition from '${currentStatus}' to '${newStatus}'. Allowed transitions: ${allowedTransitions.join(', ')}`;
+   }
+
+   return null;
+}
+
+/**
+ * Validates a priority value
+ * Returns an error message if invalid, null if valid
+ */
+export function validatePriority(priority: unknown): string | null {
+   const validPriorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
+
+   if (typeof priority !== 'string' || !validPriorities.includes(priority as TaskPriority)) {
+      return `Invalid priority value '${priority}'. Must be one of: ${validPriorities.join(', ')}`;
+   }
+
+   return null;
+}
+
+/**
+ * Validates an assignee value
+ * Returns an error message if invalid, null if valid
+ */
+export function validateAssignee(assignee: unknown): string | null {
+   if (
+      assignee !== undefined &&
+      assignee !== null &&
+      assignee !== '' &&
+      typeof assignee !== 'string'
+   ) {
+      return `Invalid assignee value. Must be a string or empty`;
+   }
+
+   return null;
+}
+
+/**
+ * Validates task update data
+ * Returns an array of error messages, empty if all valid
+ */
+export function validateTaskUpdate(
+   currentTask: TaskmasterTask,
+   updates: Partial<TaskmasterTask>
+): string[] {
+   const errors: string[] = [];
+
+   // Validate status transition
+   if (updates.status && updates.status !== currentTask.status) {
+      // Check for incomplete subtasks if trying to mark as done
+      if (updates.status === 'done' && hasIncompleteSubtasks(currentTask)) {
+         errors.push('Cannot mark task as done while subtasks are incomplete');
+      }
+
+      const statusError = validateStatusTransition(currentTask.status, updates.status);
+      if (statusError) {
+         errors.push(statusError);
+      }
+   }
+
+   // Validate priority
+   if (updates.priority !== undefined) {
+      const priorityError = validatePriority(updates.priority);
+      if (priorityError) {
+         errors.push(priorityError);
+      }
+   }
+
+   // Validate assignee
+   if ('assignee' in updates) {
+      const assigneeError = validateAssignee(updates.assignee);
+      if (assigneeError) {
+         errors.push(assigneeError);
+      }
+   }
+
+   return errors;
 }

@@ -1,11 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
    fetchTags,
    fetchTasksByTag,
    fetchCurrentTag,
    fetchState,
    fetchConfig,
+   updateTask,
 } from '@/lib/api/taskmaster';
+import { TaskmasterTask, TaskStatus, TaskPriority } from '@/types/taskmaster';
+import { UpdateTaskRequest } from '@/types/taskmaster-api';
+import { findTaskInTag, updateTaskInPlace, cloneTasks } from '@/lib/taskmaster-service';
+import { toast } from 'sonner';
 
 // Query keys
 export const taskmasterKeys = {
@@ -160,4 +165,85 @@ export function useConfig() {
          return result.data;
       },
    });
+}
+
+// Mutation hook to update a task
+export function useUpdateTask() {
+   const queryClient = useQueryClient();
+
+   const mutation = useMutation({
+      mutationFn: async (params: UpdateTaskRequest) => {
+         const result = await updateTask(params);
+         if (!result.success) {
+            throw new Error(result.error || 'Failed to update task');
+         }
+         return result.data;
+      },
+      onMutate: async (params) => {
+         // Cancel any outgoing refetches
+         await queryClient.cancelQueries({ queryKey: taskmasterKeys.tasksByTag(params.tag) });
+
+         // Snapshot the previous value
+         const previousTasks = queryClient.getQueryData(taskmasterKeys.tasksByTag(params.tag));
+
+         // Optimistically update the cache
+         queryClient.setQueryData(taskmasterKeys.tasksByTag(params.tag), (old: any) => {
+            if (!old || !old.tasks) return old;
+
+            const clonedTasks = cloneTasks(old.tasks);
+            const success = updateTaskInPlace(clonedTasks, params.taskId, params.updates);
+
+            if (!success) return old;
+
+            return {
+               ...old,
+               tasks: clonedTasks,
+            };
+         });
+
+         // Return a context object with the snapshotted value
+         return { previousTasks, tag: params.tag };
+      },
+      onError: (err, params, context) => {
+         // If the mutation fails, use the context returned from onMutate to roll back
+         if (context?.previousTasks) {
+            queryClient.setQueryData(taskmasterKeys.tasksByTag(context.tag), context.previousTasks);
+         }
+
+         // Show error toast with specific messages
+         let errorMessage = 'Failed to update task';
+
+         if (err instanceof Error) {
+            // Parse specific error types
+            if (err.message.includes('Invalid status transition')) {
+               errorMessage = err.message;
+            } else if (err.message.includes('Cannot mark task as done')) {
+               errorMessage = 'Cannot mark task as done - please complete all subtasks first';
+            } else if (err.message.includes('not found')) {
+               errorMessage = 'Task not found - it may have been deleted';
+            } else if (err.message.includes('Failed to save')) {
+               errorMessage = 'Unable to save changes - please try again';
+            } else {
+               errorMessage = err.message;
+            }
+         }
+
+         toast.error(errorMessage, {
+            action: {
+               label: 'Retry',
+               onClick: () => {
+                  // Retry the mutation with the same params
+                  mutation.mutate(params);
+               },
+            },
+         });
+      },
+      onSuccess: (data, params) => {
+         // Invalidate queries to ensure data is fresh
+         queryClient.invalidateQueries({ queryKey: taskmasterKeys.tasksByTag(params.tag) });
+         queryClient.invalidateQueries({ queryKey: taskmasterKeys.tags() });
+      },
+   });
+
+   return mutation;
 }

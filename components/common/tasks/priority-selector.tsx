@@ -14,6 +14,9 @@ import { useTasksStore } from '@/store/tasks-store';
 import { priorities, Priority } from '@/mock-data/priorities';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
+import { useUpdateTask, useCurrentTag } from '@/hooks/use-taskmaster-queries';
+import { TaskPriority } from '@/types/taskmaster';
+import { extractTaskId } from '@/lib/format-task-id';
 
 interface PrioritySelectorProps {
    priority: Priority;
@@ -27,19 +30,35 @@ export function PrioritySelector({ priority, taskId, showLabel = false }: Priori
    const [value, setValue] = useState<string>(priority.id);
 
    const { filterByPriority, updateTaskPriority } = useTasksStore();
+   const updateTaskMutation = useUpdateTask();
+   const { data: currentTagData } = useCurrentTag();
+   const currentTag = currentTagData?.currentTag || 'master';
 
    useEffect(() => {
       setValue(priority.id);
    }, [priority.id]);
 
-   const handlePriorityChange = (priorityId: string) => {
+   const handlePriorityChange = async (priorityId: string) => {
       setValue(priorityId);
       setOpen(false);
 
       if (taskId) {
          const newPriority = priorities.find((p) => p.id === priorityId);
          if (newPriority) {
+            // Update local store immediately for UI feedback
             updateTaskPriority(taskId, newPriority);
+
+            // Extract numeric task ID from the prefixed ID
+            const numericTaskId = extractTaskId(taskId);
+
+            // Trigger the API update
+            updateTaskMutation.mutate({
+               tag: currentTag,
+               taskId: numericTaskId,
+               updates: {
+                  priority: priorityId as TaskPriority,
+               },
+            });
          }
       }
    };

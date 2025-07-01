@@ -15,6 +15,9 @@ import { Status } from '@/mock-data/status';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import { TASKMASTER_STATUSES } from '@/lib/taskmaster-constants';
+import { useUpdateTask, useCurrentTag } from '@/hooks/use-taskmaster-queries';
+import { TaskStatus } from '@/types/taskmaster';
+import { extractTaskId } from '@/lib/format-task-id';
 
 interface StatusSelectorProps {
    status: Status;
@@ -28,19 +31,35 @@ export function StatusSelector({ status, taskId, showLabel = false }: StatusSele
    const [value, setValue] = useState<string>(status.id);
 
    const { updateTaskStatus, filterByStatus } = useTasksStore();
+   const updateTaskMutation = useUpdateTask();
+   const { data: currentTagData } = useCurrentTag();
+   const currentTag = currentTagData?.currentTag || 'master';
 
    useEffect(() => {
       setValue(status.id);
    }, [status.id]);
 
-   const handleStatusChange = (statusId: string) => {
+   const handleStatusChange = async (statusId: string) => {
       setValue(statusId);
       setOpen(false);
 
       if (taskId) {
          const newStatus = TASKMASTER_STATUSES.find((s) => s.id === statusId);
          if (newStatus) {
+            // Update local store immediately for UI feedback
             updateTaskStatus(taskId, newStatus);
+
+            // Extract numeric task ID from the prefixed ID
+            const numericTaskId = extractTaskId(taskId);
+
+            // Trigger the API update
+            updateTaskMutation.mutate({
+               tag: currentTag,
+               taskId: numericTaskId,
+               updates: {
+                  status: statusId as TaskStatus,
+               },
+            });
          }
       }
    };

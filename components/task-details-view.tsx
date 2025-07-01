@@ -203,8 +203,11 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
    }, [isSubtask, taskId, tagName, task.id]);
 
    // Convert to Status and Priority interfaces for selectors
+   // Normalize both 'in-progress' and 'in_progress' to 'in_progress'
+   const normalizedStatus =
+      task.status === 'in-progress' || task.status === 'in_progress' ? 'in_progress' : task.status;
    const statusObject: Status = {
-      id: task.status === 'in-progress' ? 'in_progress' : task.status,
+      id: normalizedStatus,
       name: statusInfo.name,
       color: statusInfo.color,
       icon: statusInfo.icon,
@@ -433,11 +436,7 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                            variant="ghost"
                            size="sm"
                            className="w-full justify-start gap-2 h-auto py-2 px-3 items-start"
-                           onClick={() => {
-                              console.log(
-                                 `Add ${task.complexity?.recommendedSubtasks} subtasks to task ${task.id}`
-                              );
-                           }}
+                           onClick={() => {}}
                         >
                            <Plus className="h-4 w-4 flex-shrink-0 mt-0.5" />
                            <div className="flex flex-col items-start gap-1 text-left">

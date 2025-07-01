@@ -5,12 +5,15 @@ export interface TaskComplexity {
    recommendedSubtasks: number;
 }
 
+export type TaskStatus = 'pending' | 'in_progress' | 'in-progress' | 'done' | 'cancelled';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
 export interface TaskmasterTask {
    id: number;
    title: string;
    description: string;
-   status: 'pending' | 'in_progress' | 'in-progress' | 'done' | 'cancelled';
-   priority: 'low' | 'medium' | 'high' | 'urgent';
+   status: TaskStatus;
+   priority: TaskPriority;
    dependencies: number[];
    subtasks?: TaskmasterTask[];
    assignee?: string;

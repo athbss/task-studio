@@ -15,6 +15,8 @@ import { User, users } from '@/mock-data/users';
 import { CheckIcon, UserPlus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useId, useState } from 'react';
+import { useUpdateTask, useCurrentTag } from '@/hooks/use-taskmaster-queries';
+import { extractTaskId } from '@/lib/format-task-id';
 
 interface AssigneeSelectorProps {
    user: User | null;
@@ -28,19 +30,35 @@ export function AssigneeSelector({ user, taskId, showLabel = true }: AssigneeSel
    const [value, setValue] = useState<string | null>(user?.id || null);
 
    const { updateTaskAssignee } = useTasksStore();
+   const updateTaskMutation = useUpdateTask();
+   const { data: currentTagData } = useCurrentTag();
+   const currentTag = currentTagData?.currentTag || 'master';
 
    useEffect(() => {
       setValue(user?.id || null);
    }, [user?.id]);
 
-   const handleAssigneeChange = (userId: string) => {
+   const handleAssigneeChange = async (userId: string) => {
       setValue(userId);
       setOpen(false);
 
       if (taskId) {
          const newUser = users.find((u) => u.id === userId);
          if (newUser) {
+            // Update local store immediately for UI feedback
             updateTaskAssignee(taskId, newUser);
+
+            // Extract numeric task ID from the prefixed ID
+            const numericTaskId = extractTaskId(taskId);
+
+            // Trigger the API update
+            updateTaskMutation.mutate({
+               tag: currentTag,
+               taskId: numericTaskId,
+               updates: {
+                  assignee: newUser.name, // Using name as assignee identifier
+               },
+            });
          }
       }
    };

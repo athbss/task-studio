@@ -9,8 +9,9 @@ export function QueryProvider({ children }: { children: ReactNode }) {
          new QueryClient({
             defaultOptions: {
                queries: {
-                  staleTime: Infinity,
-                  refetchOnMount: false, // Disable refetch on mount
+                  staleTime: Infinity, // Consider data stale after 1 minute
+                  refetchOnMount: false, // Refetch on mount to ensure fresh data
+                  refetchOnWindowFocus: false, // Don't refetch on window focus
                },
             },
          })

@@ -35,21 +35,23 @@ export function TaskViewOverlay() {
          tagName = idParts.slice(0, -1).join('-');
       }
 
-      // First try to find in all tasks (which includes tag information)
-      const allTasks = allTasksData.data?.allTasks || [];
-      let foundTask: TaskWithTag | undefined = allTasks.find((t) => {
-         if (tagName && t.tagName) {
-            return t.id === taskId && t.tagName === tagName;
-         }
-         return t.id === taskId;
-      });
+      // If we have a tag name in the selectedTaskId, use it
+      // Otherwise, prioritize current tag context
+      let foundTask: TaskWithTag | undefined;
 
-      // If not found, try current tag tasks (without tagName)
-      if (!foundTask) {
+      if (tagName) {
+         // Look for task in specific tag
+         const allTasks = allTasksData.data?.allTasks || [];
+         foundTask = allTasks.find((t) => t.id === taskId && t.tagName === tagName);
+      } else {
+         // No tag in ID, so prioritize current tag context
          const currentTask = currentTagData.tasks.find((t) => t.id === taskId);
          if (currentTask) {
-            // Add tagName from current tag for consistency
             foundTask = { ...currentTask, tagName: currentTagData.currentTag } as TaskWithTag;
+         } else {
+            // Fall back to searching all tasks if not in current tag
+            const allTasks = allTasksData.data?.allTasks || [];
+            foundTask = allTasks.find((t) => t.id === taskId);
          }
       }
 

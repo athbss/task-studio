@@ -63,3 +63,23 @@ export function formatSubtaskIdentifier(
    }
    return tagPrefix ? `${tagPrefix}-${parentId}.${subtaskId}` : `${parentId}.${subtaskId}`;
 }
+
+/**
+ * Extracts the numeric task ID from a prefixed task ID
+ * @param prefixedId - The prefixed task ID (e.g., "taskmaster-update-api-9", "#1", "UA-1")
+ * @returns The numeric task ID as a string (e.g., "9", "1", "1")
+ */
+export function extractTaskId(prefixedId: string): string {
+   // Remove leading # if present
+   const withoutHash = prefixedId.startsWith('#') ? prefixedId.slice(1) : prefixedId;
+
+   // Check if it contains a hyphen (tag prefix)
+   const lastHyphenIndex = withoutHash.lastIndexOf('-');
+   if (lastHyphenIndex !== -1) {
+      // Return everything after the last hyphen
+      return withoutHash.slice(lastHyphenIndex + 1);
+   }
+
+   // If no hyphen, return as is
+   return withoutHash;
+}
