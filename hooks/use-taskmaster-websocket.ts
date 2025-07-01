@@ -10,7 +10,8 @@ interface UseTaskmasterWebSocketOptions {
 }
 
 export function useTaskmasterWebSocket({
-   url = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:' + process.env.NEXT_PUBLIC_WS_PORT,
+   url = process.env.NEXT_PUBLIC_WS_URL ||
+      `ws://localhost:${process.env.NEXT_PUBLIC_WS_PORT || '5566'}`,
    enabled = true,
    onMessage,
 }: UseTaskmasterWebSocketOptions = {}) {

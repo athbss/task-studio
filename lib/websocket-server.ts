@@ -3,19 +3,19 @@ import { watch } from 'chokidar';
 import { readFileSync } from 'fs';
 import { createServer } from 'http';
 import path from 'path';
+import { TaskmasterPaths } from './taskmaster-paths';
 
-export function createTaskmasterWebSocketServer(port: number = 3001) {
+export function createTaskmasterWebSocketServer(port: number = 5566) {
    const server = createServer();
    const wss = new WebSocketServer({ server });
 
    // Watch the .taskmaster directory
-   const taskmasterPath = path.join(process.cwd(), '.taskmaster');
    const watcher = watch(
       [
-         path.join(taskmasterPath, 'tasks', 'tasks.json'),
-         path.join(taskmasterPath, 'state.json'),
-         path.join(taskmasterPath, 'config.json'),
-         path.join(taskmasterPath, 'reports', '**/*.json'),
+         TaskmasterPaths.tasks(),
+         TaskmasterPaths.state(),
+         TaskmasterPaths.config(),
+         path.join(TaskmasterPaths.reports(), '**/*.json'),
       ],
       {
          persistent: true,
@@ -80,9 +80,9 @@ export function createTaskmasterWebSocketServer(port: number = 3001) {
 
       // Send initial data
       try {
-         const tasksPath = path.join(taskmasterPath, 'tasks', 'tasks.json');
-         const statePath = path.join(taskmasterPath, 'state.json');
-         const configPath = path.join(taskmasterPath, 'config.json');
+         const tasksPath = TaskmasterPaths.tasks();
+         const statePath = TaskmasterPaths.state();
+         const configPath = TaskmasterPaths.config();
 
          // Send tasks if file exists
          try {

@@ -14,8 +14,6 @@ A local web interface for visualizing and managing AI-generated development task
 
 ## Getting Started
 
-### Install in your project
-
 ```bash
 # Clone into .taskmaster/ui directory
 git clone https://github.com/yourusername/task-ui.git .taskmaster/ui
@@ -24,11 +22,15 @@ pnpm install
 pnpm dev
 ```
 
-This keeps the UI co-located with your task data.
-
-### Open the UI
-
 Navigate to [http://localhost:5565](http://localhost:5565)
+
+## Environment Variables
+
+```env
+# .env.local
+TASKMASTER_DIR=..
+NEXT_PUBLIC_WS_PORT=5566
+```
 
 ## How it works
 
@@ -62,10 +64,12 @@ Click any task to see:
 
 ### Real-time Sync
 
-The UI uses file watchers to detect changes to:
+The UI uses WebSocket and file watchers to detect changes to:
 
 - `.taskmaster/tasks/tasks.json` - Task data
 - `.taskmaster/state.json` - Current tag context
+- `.taskmaster/config.json` - Configuration
+- `.taskmaster/reports/**/*.json` - Analysis reports
 
 ## Development
 
@@ -81,7 +85,7 @@ The UI uses file watchers to detect changes to:
 ### Commands
 
 ```bash
-pnpm dev          # Start development server
+pnpm dev          # Start development server (port 5565) + WebSocket (port 5566)
 pnpm build        # Build for production
 pnpm start        # Start production server
 pnpm lint         # Run ESLint

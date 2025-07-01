@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { readJsonFile } from '@/utils/filesystem';
+import { TaskmasterPaths } from '@/lib/taskmaster-paths';
 
 export async function GET() {
    try {
       // Read tasks.json to extract all available tags
-      const tasksPath = path.join(process.cwd(), '.taskmaster', 'tasks', 'tasks.json');
+      const tasksPath = TaskmasterPaths.tasks();
       const result = await readJsonFile(tasksPath);
 
       if (!result.success) {

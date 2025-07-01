@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
    devIndicators: false,
    env: {
       PORT: process.env.PORT || '5565',
+      TASKMASTER_DIR: process.env.TASKMASTER_DIR,
    },
 };
 

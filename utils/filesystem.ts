@@ -163,13 +163,16 @@ export async function safeReadFile(
  * Lists available .taskmaster directories in a given base path
  */
 export async function getTaskmasterDirectories(
-   basePath: string = process.cwd()
+   basePath?: string
 ): Promise<FileSystemResult<TaskmasterDirectory[]>> {
+   // Import here to avoid circular dependency
+   const { getTaskmasterTargetDir } = await import('../lib/taskmaster-paths');
+   const targetDir = basePath || getTaskmasterTargetDir();
    try {
       const directories: TaskmasterDirectory[] = [];
 
       // Check current directory
-      const currentTaskmaster = path.join(basePath, TASKMASTER_DIR);
+      const currentTaskmaster = path.join(targetDir, TASKMASTER_DIR);
       try {
          const stats = await fs.stat(currentTaskmaster);
          if (stats.isDirectory()) {

@@ -8,6 +8,7 @@ import {
    validateTaskmasterPath,
    sanitizePath,
 } from '@/utils/filesystem';
+import { getTaskmasterTargetDir } from '@/lib/taskmaster-paths';
 
 // Type for API responses
 interface ApiResponse<T = any> {
@@ -57,8 +58,8 @@ export async function GET(
 
       // Handle file requests
       if (pathSegments.length > 0) {
-         // Construct the file path
-         const filePath = path.join(process.cwd(), sanitizePath(requestPath));
+         // Construct the file path using the target directory
+         const filePath = path.join(getTaskmasterTargetDir(), sanitizePath(requestPath));
 
          // Validate the path
          if (!validateTaskmasterPath(filePath)) {
@@ -93,7 +94,7 @@ export async function GET(
          // Directory listing
          if (pathSegments[pathSegments.length - 1] === 'list') {
             const dirPath = path.join(
-               process.cwd(),
+               getTaskmasterTargetDir(),
                sanitizePath(pathSegments.slice(0, -1).join('/'))
             );
 
