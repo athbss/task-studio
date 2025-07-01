@@ -1,16 +1,16 @@
 'use client';
 
-import AllIssues from '@/components/common/issues/all-issues';
+import AllTasks from '@/components/common/tasks/all-tasks';
 import MainLayout from '@/components/layout/main-layout';
 import { useParams } from 'next/navigation';
 
-export default function TagIssuesPage() {
+export default function TagTasksPage() {
    const params = useParams();
    const tagName = params.tagName as string;
 
    return (
       <MainLayout>
-         <AllIssues showAllTags={false} tagName={tagName} />
+         <AllTasks showAllTags={false} tagName={tagName} />
       </MainLayout>
    );
 }

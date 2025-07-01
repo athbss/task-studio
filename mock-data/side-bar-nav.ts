@@ -19,24 +19,19 @@ export const inboxItems = [];
 
 export const workspaceItems = [
    {
-      name: 'Active issues',
-      url: '/issues?active=true',
+      name: 'Active tasks',
+      url: '/tasks?active=true',
       icon: FocusIcon,
    },
    {
-      name: 'All issues',
-      url: '/issues',
+      name: 'All tasks',
+      url: '/tasks',
       icon: LayoutList,
    },
    {
       name: 'Tags',
       url: '/tags',
       icon: Tag,
-   },
-   {
-      name: 'Members',
-      url: '/members',
-      icon: UserRound,
    },
 ];
 

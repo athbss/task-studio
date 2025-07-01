@@ -2,7 +2,7 @@
 
 import { useQueryState } from 'nuqs';
 import { useEffect, useCallback } from 'react';
-import { useIssueViewStore } from '@/store/issue-view-store';
+import { useTaskViewStore } from '@/store/task-view-store';
 import { extractTaskId } from '@/lib/task-id-utils';
 
 export function useTaskViewUrl() {
@@ -16,38 +16,43 @@ export function useTaskViewUrl() {
    });
 
    // Get store actions
-   const { openIssue, closeIssue, selectedIssueId, isOpen } = useIssueViewStore();
+   const {
+      openTask: openTaskStore,
+      closeTask: closeTaskStore,
+      selectedTaskId,
+      isOpen,
+   } = useTaskViewStore();
 
    // Sync from URL to store on mount and URL changes
    useEffect(() => {
       if (taskId) {
-         // The selectedIssueId in store might have tag prefix, but taskId from URL is numeric
-         const currentTaskId = selectedIssueId ? extractTaskId(selectedIssueId) : '';
+         // The selectedTaskId in store might have tag prefix, but taskId from URL is numeric
+         const currentTaskId = selectedTaskId ? extractTaskId(selectedTaskId) : '';
          if (taskId !== currentTaskId) {
             // For now, just open with the numeric ID - the overlay will handle finding the right task
-            openIssue(taskId);
+            openTaskStore(taskId);
          }
       } else if (!taskId && isOpen) {
-         closeIssue();
+         closeTaskStore();
       }
-   }, [taskId, selectedIssueId, isOpen, openIssue, closeIssue]);
+   }, [taskId, selectedTaskId, isOpen, openTaskStore, closeTaskStore]);
 
    // Enhanced open function that updates both store and URL
    const openTask = useCallback(
-      (issueId: string) => {
+      (taskId: string) => {
          // Extract just the numeric task ID for the URL
-         const numericTaskId = extractTaskId(issueId);
-         openIssue(issueId);
+         const numericTaskId = extractTaskId(taskId);
+         openTaskStore(taskId);
          setTaskId(numericTaskId);
       },
-      [openIssue, setTaskId]
+      [openTaskStore, setTaskId]
    );
 
    // Enhanced close function that updates both store and URL
    const closeTask = useCallback(() => {
-      closeIssue();
+      closeTaskStore();
       setTaskId('');
-   }, [closeIssue, setTaskId]);
+   }, [closeTaskStore, setTaskId]);
 
    return {
       taskId,

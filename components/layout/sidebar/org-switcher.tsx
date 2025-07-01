@@ -1,33 +1,26 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDown, ChevronsUpDown } from 'lucide-react';
-import { getProjectName } from '@/app/actions/taskmaster-config';
+import { ChevronDown } from 'lucide-react';
+import { useConfig } from '@/hooks/use-taskmaster-queries';
 
 import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuGroup,
    DropdownMenuItem,
-   DropdownMenuPortal,
    DropdownMenuSeparator,
    DropdownMenuShortcut,
-   DropdownMenuSub,
-   DropdownMenuSubContent,
-   DropdownMenuSubTrigger,
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { CreateNewIssue } from './create-new-issue';
+import { CreateNewTask } from './create-new-task';
 import { ThemeToggle } from '../theme-toggle';
 import Link from 'next/link';
 
 export function OrgSwitcher() {
-   const [projectName, setProjectName] = React.useState('');
-
-   React.useEffect(() => {
-      getProjectName().then(setProjectName);
-   }, []);
+   const { data: config } = useConfig();
+   const projectName = config?.global?.projectName || 'Taskmaster';
    return (
       <SidebarMenu>
          <SidebarMenuItem>
@@ -52,7 +45,7 @@ export function OrgSwitcher() {
 
                   <ThemeToggle />
 
-                  <CreateNewIssue />
+                  <CreateNewTask />
                </div>
                <DropdownMenuContent
                   className="w-[--radix-dropdown-menu-trigger-width] min-w-60 rounded-lg"
@@ -67,13 +60,13 @@ export function OrgSwitcher() {
                            <DropdownMenuShortcut>G then S</DropdownMenuShortcut>
                         </Link>
                      </DropdownMenuItem>
-                     <DropdownMenuItem>Invite and manage members</DropdownMenuItem>
+                     {/* <DropdownMenuItem>Invite and manage members</DropdownMenuItem> */}
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                      <DropdownMenuItem>Download desktop app</DropdownMenuItem>
                   </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
+                  {/* <DropdownMenuSeparator />
                   <DropdownMenuSub>
                      <DropdownMenuSubTrigger>Switch Workspace</DropdownMenuSubTrigger>
                      <DropdownMenuPortal>
@@ -82,14 +75,14 @@ export function OrgSwitcher() {
                               {/* <div className="flex text-xs aspect-square size-6 items-center justify-center rounded bg-primary text-sidebar-primary-foreground">
                                  TM
                               </div> */}
-                              {projectName}
+                  {/* {projectName}
                            </DropdownMenuItem>
                            <DropdownMenuSeparator />
                            <DropdownMenuItem>Create or join workspace</DropdownMenuItem>
                            <DropdownMenuItem>Add an account</DropdownMenuItem>
                         </DropdownMenuSubContent>
                      </DropdownMenuPortal>
-                  </DropdownMenuSub>
+                  </DropdownMenuSub> */}
                </DropdownMenuContent>
             </DropdownMenu>
          </SidebarMenuItem>

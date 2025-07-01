@@ -1,6 +1,8 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { z } from 'zod';
+import { writeFileSync, renameSync, existsSync } from 'fs';
+import crypto from 'crypto';
 
 // Type definitions for filesystem operations
 export interface FileSystemResult<T = any> {
@@ -17,6 +19,19 @@ export interface TaskmasterDirectory {
 
 // Zod schemas for validation
 const pathSchema = z.string().min(1).max(1000);
+
+// Task update validation schema
+export const taskUpdateSchema = z.object({
+   id: z.union([z.string(), z.number()]),
+   title: z.string().optional(),
+   description: z.string().optional(),
+   status: z.enum(['pending', 'in-progress', 'completed', 'done']).optional(),
+   priority: z.enum(['low', 'medium', 'high']).optional(),
+   dependencies: z.array(z.union([z.string(), z.number()])).optional(),
+   details: z.string().optional(),
+   testStrategy: z.string().optional(),
+   subtasks: z.array(z.any()).optional(),
+});
 
 // Constants
 const TASKMASTER_DIR = '.taskmaster';
@@ -262,6 +277,172 @@ export async function listFiles(
       return {
          success: false,
          error: error instanceof Error ? error.message : 'Error listing files',
+      };
+   }
+}
+
+/**
+ * Atomically writes JSON data to a file using a temporary file and rename
+ * This ensures the file is either fully written or not written at all
+ */
+export async function writeJsonFile<T = any>(
+   filePath: string,
+   data: T,
+   options?: { pretty?: boolean }
+): Promise<FileSystemResult<void>> {
+   try {
+      // Validate the path
+      if (!validateTaskmasterPath(filePath)) {
+         return {
+            success: false,
+            error: 'Invalid file path',
+         };
+      }
+
+      // Ensure the file extension is allowed
+      const ext = path.extname(filePath).toLowerCase();
+      if (ext !== '.json') {
+         return {
+            success: false,
+            error: 'Only JSON files are allowed for writing',
+         };
+      }
+
+      // Create a temporary file path
+      const tempPath = `${filePath}.${crypto.randomBytes(6).toString('hex')}.tmp`;
+
+      try {
+         // Serialize the data
+         const jsonString = options?.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+
+         // Write to temporary file first
+         writeFileSync(tempPath, jsonString, 'utf-8');
+
+         // Atomically rename the temp file to the target file
+         renameSync(tempPath, filePath);
+
+         return {
+            success: true,
+         };
+      } catch (error) {
+         // Clean up temp file if it exists
+         if (existsSync(tempPath)) {
+            try {
+               await fs.unlink(tempPath);
+            } catch {
+               // Ignore cleanup errors
+            }
+         }
+         throw error;
+      }
+   } catch (error) {
+      return {
+         success: false,
+         error: error instanceof Error ? error.message : 'Error writing JSON file',
+      };
+   }
+}
+
+/**
+ * Simple file locking mechanism using last-write-wins approach
+ * This is a basic implementation that doesn't provide true locking
+ * but helps coordinate writes by checking modification times
+ */
+export async function acquireFileLock(
+   filePath: string,
+   timeout: number = 5000
+): Promise<FileSystemResult<{ release: () => void; mtime?: Date }>> {
+   try {
+      if (!validateTaskmasterPath(filePath)) {
+         return {
+            success: false,
+            error: 'Invalid file path',
+         };
+      }
+
+      // Get current modification time if file exists
+      let currentMtime: Date | undefined;
+      try {
+         const stats = await fs.stat(filePath);
+         currentMtime = stats.mtime;
+      } catch {
+         // File doesn't exist yet, which is fine
+      }
+
+      // In a real implementation, we would create a lock file or use file locks
+      // For now, we'll use a simple approach that checks modification time
+      const lockId = crypto.randomBytes(16).toString('hex');
+      const lockFile = `${filePath}.lock`;
+
+      // Try to create a lock file
+      const startTime = Date.now();
+      while (Date.now() - startTime < timeout) {
+         try {
+            // Try to create lock file exclusively
+            await fs.writeFile(lockFile, lockId, { flag: 'wx' });
+
+            // Success! Return the lock with a release function
+            return {
+               success: true,
+               data: {
+                  mtime: currentMtime,
+                  release: async () => {
+                     try {
+                        // Verify we still own the lock
+                        const lockContent = await fs.readFile(lockFile, 'utf-8');
+                        if (lockContent === lockId) {
+                           await fs.unlink(lockFile);
+                        }
+                     } catch {
+                        // Ignore errors during release
+                     }
+                  },
+               },
+            };
+         } catch (error: any) {
+            if (error.code === 'EEXIST') {
+               // Lock file exists, wait a bit and retry
+               await new Promise((resolve) => setTimeout(resolve, 100));
+            } else {
+               throw error;
+            }
+         }
+      }
+
+      return {
+         success: false,
+         error: 'Failed to acquire lock: timeout',
+      };
+   } catch (error) {
+      return {
+         success: false,
+         error: error instanceof Error ? error.message : 'Error acquiring file lock',
+      };
+   }
+}
+
+/**
+ * Validates task update data using Zod schema
+ */
+export function validateTaskUpdate(
+   data: unknown
+): FileSystemResult<z.infer<typeof taskUpdateSchema>> {
+   try {
+      const validated = taskUpdateSchema.parse(data);
+      return {
+         success: true,
+         data: validated,
+      };
+   } catch (error) {
+      if (error instanceof z.ZodError) {
+         return {
+            success: false,
+            error: `Validation error: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+         };
+      }
+      return {
+         success: false,
+         error: 'Unknown validation error',
       };
    }
 }

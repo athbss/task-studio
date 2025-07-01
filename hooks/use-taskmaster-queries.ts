@@ -1,6 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchTags, fetchTasksByTag, fetchCurrentTag, fetchState } from '@/lib/api/taskmaster';
-import { TaskmasterTask } from '@/types/taskmaster';
+import { useQuery } from '@tanstack/react-query';
+import {
+   fetchTags,
+   fetchTasksByTag,
+   fetchCurrentTag,
+   fetchState,
+   fetchConfig,
+} from '@/lib/api/taskmaster';
 
 // Query keys
 export const taskmasterKeys = {
@@ -9,6 +14,7 @@ export const taskmasterKeys = {
    currentTag: () => [...taskmasterKeys.all, 'currentTag'] as const,
    tasksByTag: (tag: string) => [...taskmasterKeys.all, 'tasks', tag] as const,
    state: () => [...taskmasterKeys.all, 'state'] as const,
+   config: () => [...taskmasterKeys.all, 'config'] as const,
 };
 
 // Hook to fetch all tags
@@ -140,4 +146,18 @@ export function useFilteredTasks(filters: {
    }
 
    return filtered;
+}
+
+// Hook to fetch config
+export function useConfig() {
+   return useQuery({
+      queryKey: taskmasterKeys.config(),
+      queryFn: async () => {
+         const result = await fetchConfig();
+         if (!result.success) {
+            throw new Error(result.error || 'Failed to fetch config');
+         }
+         return result.data;
+      },
+   });
 }

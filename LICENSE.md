@@ -1,5 +1,6 @@
 MIT License
 
+Copyright (c) zbeyens
 Copyright (c) 2025 lndev-ui | Circle Template
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

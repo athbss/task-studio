@@ -1,6 +1,6 @@
 'use client';
 
-import { ChartScatter, CircuitBoard, Layers, LayoutList, MoreHorizontal } from 'lucide-react';
+import { Calculator, LayoutList, MoreHorizontal, Users } from 'lucide-react';
 
 import {
    DropdownMenu,
@@ -18,9 +18,11 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { workspaceItems } from '@/mock-data/side-bar-nav';
-import { RiPresentationLine } from '@remixicon/react';
+import { useRouter } from 'next/navigation';
 
 export function NavWorkspace() {
+   const router = useRouter();
+
    return (
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
@@ -46,8 +48,12 @@ export function NavWorkspace() {
                      </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48 rounded-lg" side="bottom" align="start">
+                     <DropdownMenuItem onClick={() => router.push('/members')}>
+                        <Users className="text-muted-foreground" />
+                        <span>Members</span>
+                     </DropdownMenuItem>
                      <DropdownMenuItem>
-                        <CircuitBoard className="text-muted-foreground" />
+                        <Calculator className="text-muted-foreground" />
                         <span>Reports</span>
                      </DropdownMenuItem>
                      <DropdownMenuSeparator />

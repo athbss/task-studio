@@ -3,22 +3,22 @@
  */
 
 /**
- * Extract numeric task ID from an Issue ID
+ * Extract numeric task ID from a Task ID
  * Examples:
  * - "user-auth-1" -> "1"
  * - "mobile-app-1.2" -> "1.2"
  * - "1" -> "1"
  * - "1.2.3" -> "1.2.3"
  */
-export function extractTaskId(issueId: string): string {
+export function extractTaskId(taskId: string): string {
    // If it's already a numeric ID (with possible dots for subtasks), return as-is
-   if (/^[\d.]+$/.test(issueId)) {
-      return issueId;
+   if (/^[\d.]+$/.test(taskId)) {
+      return taskId;
    }
 
    // Otherwise, extract the numeric part after the last hyphen
-   const parts = issueId.split('-');
-   return parts[parts.length - 1] || issueId;
+   const parts = taskId.split('-');
+   return parts[parts.length - 1] || taskId;
 }
 
 /**

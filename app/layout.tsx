@@ -42,6 +42,8 @@ import { QueryProvider } from '@/components/providers/query-provider';
 import { NuqsProvider } from '@/components/providers/nuqs-provider';
 import { TaskmasterWebSocketProvider } from '@/components/providers/taskmaster-websocket-provider';
 
+import { Suspense } from 'react';
+
 export default function RootLayout({
    children,
 }: Readonly<{
@@ -56,7 +58,9 @@ export default function RootLayout({
             <NuqsProvider>
                <QueryProvider>
                   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-                     <TaskmasterWebSocketProvider>{children}</TaskmasterWebSocketProvider>
+                     <Suspense fallback={null}>
+                        <TaskmasterWebSocketProvider>{children}</TaskmasterWebSocketProvider>
+                     </Suspense>
                      <Toaster />
                   </ThemeProvider>
                </QueryProvider>

@@ -81,7 +81,7 @@ const features: Feature[] = [
       icon: <Layers className="" size={20} />,
       title: 'Triage',
       description:
-         'Prioritize issues created from multiple your team and customer support integrations',
+         'Prioritize tasks created from multiple your team and customer support integrations',
       actionLabel: 'Learn more',
       teamsActivated: 4,
    },
@@ -135,21 +135,21 @@ const integrations: Integration[] = [
    {
       icon: <SiSlack size={24} />,
       title: 'Slack',
-      description: 'Send notifications to channels and create issues from messages',
+      description: 'Send notifications to channels and create tasks from messages',
       enabled: true,
       actionLabel: 'Enabled',
    },
    {
       icon: <SiFigma size={24} />,
       title: 'Figma',
-      description: 'Embed file previews in issues',
+      description: 'Embed file previews in tasks',
       enabled: true,
       actionLabel: 'Enabled',
    },
    {
       icon: <SiSentry size={24} />,
       title: 'Sentry',
-      description: 'Link exceptions to issues',
+      description: 'Link exceptions to tasks',
       actionLabel: 'Open',
    },
    {
@@ -167,7 +167,7 @@ const integrations: Integration[] = [
    {
       icon: <SiGooglesheets size={20} />,
       title: 'Google Sheets',
-      description: 'Export issues and build custom analytics',
+      description: 'Export tasks and build custom analytics',
       actionLabel: 'Open',
    },
 ];

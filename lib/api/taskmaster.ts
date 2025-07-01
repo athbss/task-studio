@@ -24,6 +24,14 @@ export interface TaskmasterState {
    [key: string]: any;
 }
 
+export interface TaskmasterConfig {
+   global?: {
+      projectName?: string;
+      [key: string]: any;
+   };
+   [key: string]: any;
+}
+
 const API_BASE = '/api/taskmaster';
 
 /**
@@ -161,6 +169,23 @@ export async function listFiles(dirPath: string): Promise<ApiResponse<string[]>>
       return {
          success: false,
          error: error instanceof Error ? error.message : 'Failed to list files',
+         timestamp: new Date().toISOString(),
+      };
+   }
+}
+
+/**
+ * Fetches the config.json file
+ */
+export async function fetchConfig(): Promise<ApiResponse<TaskmasterConfig>> {
+   try {
+      const response = await fetch(`${API_BASE}/config`);
+      const data = await response.json();
+      return data;
+   } catch (error) {
+      return {
+         success: false,
+         error: error instanceof Error ? error.message : 'Failed to fetch config',
          timestamp: new Date().toISOString(),
       };
    }

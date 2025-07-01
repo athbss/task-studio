@@ -34,9 +34,12 @@ function createResponse<T>(
    return NextResponse.json(response, { status });
 }
 
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function GET(
+   request: NextRequest,
+   { params }: { params: Promise<{ path: string[] }> }
+) {
    try {
-      const pathSegments = params.path || [];
+      const pathSegments = (await params).path || [];
       const requestPath = pathSegments.join('/');
 
       // Handle different API endpoints

@@ -42,7 +42,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <HelpButton />
                   <Button size="icon" variant="secondary" asChild>
                      <Link
-                        href="https://github.com/udecode/dotai"
+                        href="https://github.com/udecode/task-ui"
                         target="_blank"
                         rel="noopener noreferrer"
                      >

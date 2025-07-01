@@ -11,7 +11,12 @@ export function createTaskmasterWebSocketServer(port: number = 3001) {
    // Watch the .taskmaster directory
    const taskmasterPath = path.join(process.cwd(), '.taskmaster');
    const watcher = watch(
-      [path.join(taskmasterPath, 'tasks', 'tasks.json'), path.join(taskmasterPath, 'state.json')],
+      [
+         path.join(taskmasterPath, 'tasks', 'tasks.json'),
+         path.join(taskmasterPath, 'state.json'),
+         path.join(taskmasterPath, 'config.json'),
+         path.join(taskmasterPath, 'reports', '**/*.json'),
+      ],
       {
          persistent: true,
          ignoreInitial: true,
@@ -77,6 +82,7 @@ export function createTaskmasterWebSocketServer(port: number = 3001) {
       try {
          const tasksPath = path.join(taskmasterPath, 'tasks', 'tasks.json');
          const statePath = path.join(taskmasterPath, 'state.json');
+         const configPath = path.join(taskmasterPath, 'config.json');
 
          // Send tasks if file exists
          try {
@@ -104,6 +110,20 @@ export function createTaskmasterWebSocketServer(port: number = 3001) {
             );
          } catch {
             console.log('State file not found or invalid');
+         }
+
+         // Send config if file exists
+         try {
+            const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+            ws.send(
+               JSON.stringify({
+                  type: 'initial-config',
+                  config,
+                  timestamp: new Date().toISOString(),
+               })
+            );
+         } catch {
+            console.log('Config file not found or invalid');
          }
       } catch (error) {
          console.error('Error sending initial data:', error);

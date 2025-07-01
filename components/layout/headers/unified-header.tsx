@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useIssueViewStore } from '@/store/issue-view-store';
+import { useTaskViewStore } from '@/store/task-view-store';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSearchStore } from '@/store/search-store';
-import { Filter } from '@/components/layout/headers/issues/filter';
+import { Filter } from '@/components/layout/headers/tasks/filter';
 import { useCurrentTagWithTasks, useTags } from '@/hooks/use-taskmaster-queries';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -51,7 +51,7 @@ interface HeaderConfig {
 
 export function UnifiedHeader() {
    const pathname = usePathname();
-   const { isOpen: isIssueViewOpen, closeIssue, selectedIssueId } = useIssueViewStore();
+   const { isOpen: isTaskViewOpen, closeTask, selectedTaskId } = useTaskViewStore();
    const { isSearchOpen, toggleSearch, closeSearch, setSearchQuery, searchQuery } =
       useSearchStore();
    const [viewType, setViewType] = useQueryState('view', {
@@ -59,7 +59,7 @@ export function UnifiedHeader() {
       parse: (value) => (value === 'board' || value === 'list' ? value : 'list'),
       history: 'push',
    });
-   const [issueFilter, setIssueFilter] = useQueryState('filter', {
+   const [taskFilter, setTaskFilter] = useQueryState('filter', {
       defaultValue: 'all',
       parse: (value) => (value === 'all' || value === 'active' ? value : 'all'),
       history: 'push',
@@ -86,12 +86,10 @@ export function UnifiedHeader() {
       setSearchQuery(debouncedSearchValue);
    }, [debouncedSearchValue, setSearchQuery]);
 
-   // Reset local value when searchQuery is cleared externally
+   // Sync local value with external search query changes
    useEffect(() => {
-      if (searchQuery === '' && localSearchValue !== '') {
-         setLocalSearchValue('');
-      }
-   }, [searchQuery, localSearchValue]);
+      setLocalSearchValue(searchQuery);
+   }, [searchQuery]);
 
    // Search effects
    useEffect(() => {
@@ -122,12 +120,12 @@ export function UnifiedHeader() {
 
    // Determine the current page
    const getPageType = () => {
-      if (isIssueViewOpen) return 'issue-detail';
-      if (pathname === '/issues') return 'issues';
+      if (isTaskViewOpen) return 'task-detail';
+      if (pathname === '/tasks') return 'tasks';
       if (pathname === '/tags') return 'tags';
       if (pathname === '/members') return 'members';
       if (pathname === '/settings') return 'settings';
-      if (isTagRoute) return 'tag-issues';
+      if (isTagRoute) return 'tag-tasks';
       return 'unknown';
    };
 
@@ -136,7 +134,7 @@ export function UnifiedHeader() {
    // Get configuration based on page type
    const getHeaderConfig = (): HeaderConfig => {
       switch (pageType) {
-         case 'issue-detail':
+         case 'task-detail':
             return {
                title: '',
                showSearch: false,
@@ -144,10 +142,10 @@ export function UnifiedHeader() {
                showNotifications: false,
                showOptions: false,
             };
-         case 'issues':
-         case 'tag-issues':
+         case 'tasks':
+         case 'tag-tasks':
             return {
-               title: currentTag || 'Issues',
+               title: currentTag || 'Tasks',
                showSearch: true,
                showCount: true,
                showNotifications: true,
@@ -190,11 +188,11 @@ export function UnifiedHeader() {
 
    const config = getHeaderConfig();
 
-   // Get current task for issue detail view
+   // Get current task for task detail view
    const getCurrentTask = () => {
-      if (!selectedIssueId || !isIssueViewOpen) return null;
+      if (!selectedTaskId || !isTaskViewOpen) return null;
 
-      const idParts = selectedIssueId.split('-');
+      const idParts = selectedTaskId.split('-');
       let numericId: number;
 
       if (idParts.length > 1) {
@@ -210,13 +208,13 @@ export function UnifiedHeader() {
 
    const currentTask = getCurrentTask();
 
-   // Render issue detail header
-   if (pageType === 'issue-detail' && currentTask) {
+   // Render task detail header
+   if (pageType === 'task-detail' && currentTask) {
       return (
          <header className="w-full flex flex-col border-b">
             <div className="flex items-center justify-between px-6 py-3">
                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={closeIssue} className="h-8 w-8">
+                  <Button variant="ghost" size="icon" onClick={closeTask} className="h-8 w-8">
                      <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="text-xs font-mono">
@@ -288,7 +286,7 @@ export function UnifiedHeader() {
                                     }
                                  }
                               }}
-                              placeholder="Search issues..."
+                              placeholder="Search tasks..."
                               className="pl-8 h-7 text-sm"
                               onKeyDown={(e) => {
                                  if (e.key === 'Escape') {
@@ -328,7 +326,7 @@ export function UnifiedHeader() {
                            <span className="text-xs bg-accent rounded-md px-1.5 py-1">
                               {pageType === 'tags'
                                  ? tagsData?.length || 0
-                                 : issueFilter === 'active'
+                                 : taskFilter === 'active'
                                    ? currentTagData.tasks.filter(
                                         (t) => t.status === 'in-progress' || t.status === 'pending'
                                      ).length
@@ -336,21 +334,21 @@ export function UnifiedHeader() {
                            </span>
                         )}
                      </div>
-                     {(pageType === 'issues' || pageType === 'tag-issues') && (
+                     {(pageType === 'tasks' || pageType === 'tag-tasks') && (
                         <div className="flex items-center gap-1 ml-4">
                            <Button
-                              variant={issueFilter === 'all' ? 'default' : 'outline'}
+                              variant={taskFilter === 'all' ? 'default' : 'outline'}
                               size="xs"
-                              onClick={() => setIssueFilter('all')}
+                              onClick={() => setTaskFilter('all')}
                               className="h-7 px-2"
                            >
                               <ListTodo className="h-4 w-4 mr-1" />
-                              All issues
+                              All tasks
                            </Button>
                            <Button
-                              variant={issueFilter === 'active' ? 'default' : 'outline'}
+                              variant={taskFilter === 'active' ? 'default' : 'outline'}
                               size="xs"
-                              onClick={() => setIssueFilter('active')}
+                              onClick={() => setTaskFilter('active')}
                               className="h-7 px-2"
                            >
                               <CircleDashed className="h-4 w-4 mr-1" />
@@ -380,7 +378,7 @@ export function UnifiedHeader() {
 
          {/* Header Options */}
          {config.showOptions && (
-            <div className="w-full flex justify-between items-center border-b py-1.5 px-6 h-10">
+            <div className="w-full flex justify-between items-center py-1.5 px-6 h-10">
                <Filter />
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>

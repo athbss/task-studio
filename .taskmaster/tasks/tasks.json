@@ -225,7 +225,7 @@
          "description": "Tasks for taskmaster-circle-ui context"
       }
    },
-   "issue-viewer": {
+   "task-viewer": {
       "tasks": [
          {
             "id": 1,
@@ -330,7 +330,7 @@
       "metadata": {
          "created": "2025-06-29T13:28:30.206Z",
          "updated": "2025-06-30T00:51:37.929Z",
-         "description": "Tasks for issue-viewer context"
+         "description": "Tasks for task-viewer context"
       }
    },
    "taskmaster-update-api": {
@@ -343,7 +343,7 @@
             "testStrategy": "Test concurrent write operations, verify file integrity after writes, test error scenarios like permission denied and disk full, validate temporary file cleanup on success and failure",
             "priority": "high",
             "dependencies": [],
-            "status": "in-progress",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -354,7 +354,7 @@
             "testStrategy": "Test finding tasks with various ID formats (1, 1.2, 1.2.1), verify correct task modification preserves other fields, test edge cases like non-existent tasks and invalid IDs",
             "priority": "high",
             "dependencies": [1],
-            "status": "pending",
+            "status": "done",
             "subtasks": []
          },
          {
@@ -448,7 +448,7 @@
       ],
       "metadata": {
          "created": "2025-06-30T16:12:43.811Z",
-         "updated": "2025-06-30T18:17:30.205Z",
+         "updated": "2025-06-30T18:23:45.445Z",
          "description": "Tasks for taskmaster-update-api context"
       }
    }

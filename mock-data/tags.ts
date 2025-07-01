@@ -94,7 +94,7 @@ export function createTagFromData(
       id: tagName,
       name:
          tagName === 'master'
-            ? 'Main'
+            ? 'Master'
             : tagName
                  .split('-')
                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -121,5 +121,5 @@ export function getTagsFromData(
 // Default mock tags for fallback/demo purposes
 export const tags: Tag[] = [
    createTagFromData('master', 8, { created: '2025-03-01' }, 0),
-   createTagFromData('issue-viewer', 10, { created: '2025-03-08' }, 1),
+   createTagFromData('task-viewer', 10, { created: '2025-03-08' }, 1),
 ];
