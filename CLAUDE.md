@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Task UI - A web-based interface for the Taskmaster CLI task management system. This UI template provides a visual, interactive way to view and manage tasks from `.taskmaster` JSON files with real-time updates.
+Task Studio - A web-based interface for the Taskmaster CLI task management system. This UI template provides a visual, interactive way to view and manage tasks from `.taskmaster` JSON files with real-time updates.
 
 - `.taskmaster/docs/app-design-document.md` - App design document
 - `.taskmaster/docs/tech-stack.md` - Tech stack, architecture

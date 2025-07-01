@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
 import { readJsonFile } from '@/utils/filesystem';
+import { TaskmasterPaths } from '@/lib/taskmaster-paths';
 
 export async function GET() {
    try {
-      // Read state.json from the current .taskmaster directory
-      const statePath = path.join(process.cwd(), '.taskmaster', 'state.json');
+      // Read state.json from the .taskmaster directory
+      const statePath = TaskmasterPaths.state();
       const result = await readJsonFile(statePath);
 
       if (!result.success) {
@@ -13,6 +13,7 @@ export async function GET() {
             {
                success: false,
                error: result.error || 'Failed to read state.json',
+               path: statePath,
                timestamp: new Date().toISOString(),
             },
             { status: 404 }

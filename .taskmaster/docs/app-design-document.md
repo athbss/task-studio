@@ -1,8 +1,8 @@
-# Task UI - Application Design Document
+# Task Studio - Application Design Document
 
 ## Introduction
 
-Task UI is a web-based visualization and management interface for the Taskmaster CLI task management system. It transforms the command-line experience of Taskmaster into an intuitive, visual interface that provides real-time insights into task organization, progress, and relationships while maintaining the simplicity and power of the underlying CLI tool.
+Task Studio is a web-based visualization and management interface for the Taskmaster CLI task management system. It transforms the command-line experience of Taskmaster into an intuitive, visual interface that provides real-time insights into task organization, progress, and relationships while maintaining the simplicity and power of the underlying CLI tool.
 
 ### Application Purpose
 
@@ -27,7 +27,7 @@ Task UI is a web-based visualization and management interface for the Taskmaster
 
 ### Business Context
 
-Task UI serves as a companion tool to Taskmaster CLI, similar to how Prisma Studio complements Prisma CLI. It aims to lower the barrier to entry for visual thinkers while maintaining the power user features that make Taskmaster effective for complex project management.
+Task Studio serves as a companion tool to Taskmaster CLI, similar to how Prisma Studio complements Prisma CLI. It aims to lower the barrier to entry for visual thinkers while maintaining the power user features that make Taskmaster effective for complex project management.
 
 ## Core Features
 
@@ -130,7 +130,7 @@ Task UI serves as a companion tool to Taskmaster CLI, similar to how Prisma Stud
 
 1. **Morning Task Review**
 
-   - Open Task UI
+   - Open Task Studio
    - View current tag context tasks
    - Filter by "in-progress" status
    - Identify next task to work on
@@ -334,7 +334,7 @@ Task UI serves as a companion tool to Taskmaster CLI, similar to how Prisma Stud
 
 ### Long-term Vision
 
-Task UI aims to become the definitive visual interface for Taskmaster, eventually supporting:
+Task Studio aims to become the definitive visual interface for Taskmaster, eventually supporting:
 
 - Desktop application via Electron/Tauri
 - Cloud sync for team collaboration

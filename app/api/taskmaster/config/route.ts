@@ -1,20 +1,35 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { TaskmasterPaths } from '@/lib/taskmaster-paths';
 
 export async function GET() {
    try {
       const configPath = TaskmasterPaths.config();
 
-      const configData = await fs.readFile(configPath, 'utf-8');
-      const config = JSON.parse(configData);
+      try {
+         const configData = await fs.readFile(configPath, 'utf-8');
+         const config = JSON.parse(configData);
 
-      return NextResponse.json({
-         success: true,
-         data: config,
-         timestamp: new Date().toISOString(),
-      });
+         return NextResponse.json({
+            success: true,
+            data: config,
+            timestamp: new Date().toISOString(),
+         });
+      } catch (error: any) {
+         // If config doesn't exist, return empty config instead of error
+         if (error.code === 'ENOENT') {
+            return NextResponse.json({
+               success: true,
+               data: {
+                  global: {
+                     projectName: 'Task Studio',
+                  },
+               },
+               timestamp: new Date().toISOString(),
+            });
+         }
+         throw error;
+      }
    } catch (error) {
       console.error('Error reading config:', error);
       return NextResponse.json(

@@ -1,4 +1,4 @@
-# Task UI - Product Requirements Document (Read-Only MVP)
+# Task Studio - Product Requirements Document (Read-Only MVP)
 
 <context>
 # Overview
@@ -15,7 +15,7 @@
 
 # Overview
 
-Task UI is a read-only web visualization interface for the Taskmaster CLI task management system. It provides developers with an intuitive, visual way to browse and understand their Taskmaster tasks without leaving their development environment. Like Prisma Studio for databases, Task UI offers a local-first, zero-configuration companion tool that complements the CLI workflow.
+Task Studio is a read-only web visualization interface for the Taskmaster CLI task management system. It provides developers with an intuitive, visual way to browse and understand their Taskmaster tasks without leaving their development environment. Like Prisma Studio for databases, Task Studio offers a local-first, zero-configuration companion tool that complements the CLI workflow.
 
 The initial MVP focuses exclusively on read-only operations: reading `.taskmaster/tasks/tasks.json` files, displaying tasks in an organized visual format, and automatically updating the UI when files change on disk.
 
@@ -80,7 +80,7 @@ The initial MVP focuses exclusively on read-only operations: reading `.taskmaste
 
 ### Daily Task Review
 
-1. Open Task UI (bookmark or command)
+1. Open Task Studio (bookmark or command)
 2. View current tag's tasks in preferred view (board/list)
 3. Filter by status to see in-progress work
 4. Search for specific task by keyword

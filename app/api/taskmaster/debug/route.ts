@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
 import { promises as fs } from 'fs';
 import { validateTaskmasterPath } from '@/utils/filesystem';
+import { TaskmasterPaths, getTaskmasterPath, getTaskmasterTargetDir } from '@/lib/taskmaster-paths';
 
 export async function GET() {
    try {
       const cwd = process.cwd();
-      const tasksPath = path.join(cwd, '.taskmaster', 'tasks', 'tasks.json');
-      const statePath = path.join(cwd, '.taskmaster', 'state.json');
+      const tasksPath = TaskmasterPaths.tasks();
+      const statePath = TaskmasterPaths.state();
 
       // Debug info
       const debug: Record<string, any> = {
@@ -18,6 +18,14 @@ export async function GET() {
          statePathIsValid: validateTaskmasterPath(statePath),
          tasksPathRelative: '.taskmaster/tasks/tasks.json',
          tasksPathRelativeIsValid: validateTaskmasterPath('.taskmaster/tasks/tasks.json'),
+         env: {
+            TASKMASTER_DIR: process.env.TASKMASTER_DIR,
+            USER_CWD: process.env.USER_CWD,
+            PWD: process.env.PWD,
+            INIT_CWD: process.env.INIT_CWD,
+         },
+         targetDir: getTaskmasterTargetDir(),
+         taskmasterPath: getTaskmasterPath(),
       };
 
       // Try to check if files exist

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
-import path from 'path';
 import {
    findTaskInTag,
    updateTaskInPlace,
@@ -9,6 +8,8 @@ import {
 } from '@/lib/taskmaster-service';
 import { TagContext } from '@/types/taskmaster';
 import { UpdateTaskResponse, updateTaskSchema } from '@/types/taskmaster-api';
+import { TaskmasterPaths } from '@/lib/taskmaster-paths';
+import { writeJsonFile } from '@/utils/filesystem';
 
 export async function POST(request: NextRequest) {
    try {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
       const { tag, taskId, updates } = validationResult.data;
 
       // Read current tasks file
-      const tasksPath = path.join(process.cwd(), '.taskmaster/tasks/tasks.json');
+      const tasksPath = TaskmasterPaths.tasks();
 
       let tasksData: Record<string, TagContext>;
       try {
@@ -109,16 +110,13 @@ export async function POST(request: NextRequest) {
          tasksData[tag].metadata.updatedAt = new Date().toISOString();
       }
 
-      // Write back to file atomically
-      try {
-         const tempPath = `${tasksPath}.tmp`;
-         await fs.writeFile(tempPath, JSON.stringify(tasksData, null, 2));
-         await fs.rename(tempPath, tasksPath);
-      } catch {
+      // Write back to file atomically using the filesystem utility
+      const writeResult = await writeJsonFile(tasksPath, tasksData, { pretty: true });
+      if (!writeResult.success) {
          return NextResponse.json<UpdateTaskResponse>(
             {
                success: false,
-               error: 'Failed to save updated tasks',
+               error: writeResult.error || 'Failed to save updated tasks',
                timestamp: new Date().toISOString(),
             },
             { status: 500 }
@@ -147,7 +145,6 @@ export async function POST(request: NextRequest) {
          { status: 200 }
       );
    } catch (error) {
-      console.error('Error in update task API:', error);
       return NextResponse.json<UpdateTaskResponse>(
          {
             success: false,

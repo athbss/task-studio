@@ -6,11 +6,14 @@ import path from 'path';
  * otherwise defaults to current directory
  */
 export function getTaskmasterTargetDir(): string {
-   const targetDir = process.env.TASKMASTER_DIR;
+   // If TASKMASTER_DIR is set, it's already the full path to .taskmaster
+   if (process.env.TASKMASTER_DIR) {
+      return process.env.TASKMASTER_DIR;
+   }
 
-   if (targetDir) {
-      // If it's a relative path, resolve it relative to the current working directory
-      return path.isAbsolute(targetDir) ? targetDir : path.resolve(process.cwd(), targetDir);
+   // Check if we have the USER_CWD from the CLI - this is the user's project directory
+   if (process.env.USER_CWD) {
+      return process.env.USER_CWD;
    }
 
    // Default to current working directory
@@ -21,19 +24,18 @@ export function getTaskmasterTargetDir(): string {
  * Gets the full path to the .taskmaster directory
  */
 export function getTaskmasterPath(): string {
-   const targetDir = process.env.TASKMASTER_DIR;
-
-   if (targetDir) {
-      // If TASKMASTER_DIR is set, use it directly (it should point to .taskmaster)
-      const resolved = path.isAbsolute(targetDir)
-         ? targetDir
-         : path.resolve(process.cwd(), targetDir);
-      return resolved;
+   // If TASKMASTER_DIR is set, use it directly (it should already point to .taskmaster)
+   if (process.env.TASKMASTER_DIR) {
+      return process.env.TASKMASTER_DIR;
    }
 
-   // Default: add .taskmaster to current directory
-   const defaultPath = path.join(process.cwd(), '.taskmaster');
-   return defaultPath;
+   // If we have USER_CWD, that's the project root, so append .taskmaster
+   if (process.env.USER_CWD) {
+      return path.join(process.env.USER_CWD, '.taskmaster');
+   }
+
+   // This should never happen when running via CLI, but fallback just in case
+   return path.join(process.cwd(), '.taskmaster');
 }
 
 /**

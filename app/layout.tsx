@@ -17,8 +17,8 @@ const siteUrl = 'https://circle.lndev.me';
 
 export const metadata: Metadata = {
    title: {
-      template: '%s | Task UI',
-      default: 'Task UI',
+      template: '%s | Task Studio',
+      default: 'Task Studio',
    },
    description:
       'A web-based interface for the Taskmaster CLI task management system. View and manage tasks from .taskmaster JSON files with real-time updates.',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
       type: 'website',
       locale: 'en_US',
       url: siteUrl,
-      siteName: 'Task UI',
+      siteName: 'Task Studio',
    },
    twitter: {
       card: 'summary_large_image',

@@ -54,13 +54,17 @@ export function TaskLine({ task, layoutId = false, showTagBadge = true }: TaskLi
             >
                <div className="flex items-center gap-0.5">
                   <div onClick={(e) => e.stopPropagation()}>
-                     <PrioritySelector priority={task.priority} taskId={task.id} />
+                     <PrioritySelector
+                        priority={task.priority}
+                        taskId={task.id}
+                        tagName={task.tag?.id}
+                     />
                   </div>
                   <span className="text-sm hidden sm:inline-block text-muted-foreground font-medium w-[52px] truncate shrink-0 mr-0.5">
                      {task.identifier}
                   </span>
                   <div onClick={(e) => e.stopPropagation()}>
-                     <StatusSelector status={task.status} taskId={task.id} />
+                     <StatusSelector status={task.status} taskId={task.id} tagName={task.tag?.id} />
                   </div>
                </div>
                <span className="min-w-0 flex items-center justify-start mr-1 ml-0.5">

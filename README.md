@@ -1,4 +1,4 @@
-# Task UI
+# Task Studio
 
 AI task management UI compatible with [Task Master](https://github.com/eyaltoledano/claude-task-master).
 
@@ -14,22 +14,32 @@ A local web interface for visualizing and managing AI-generated development task
 
 ## Getting Started
 
+### Install Your Project
+
+Run Task Studio:
+
 ```bash
-# Clone into .taskmaster/ui directory
-git clone https://github.com/yourusername/task-ui.git .taskmaster/ui
-cd .taskmaster/ui
-pnpm install
-pnpm dev
+npx task-studio@latest
+```
+
+Or install it as a dev dependency:
+
+```bash
+pnpm add -D task-studio
+pnpm task-studio
 ```
 
 Navigate to [http://localhost:5565](http://localhost:5565)
 
-## Environment Variables
+### CLI Options
 
-```env
-# .env.local
-TASKMASTER_DIR=..
-NEXT_PUBLIC_WS_PORT=5566
+```bash
+npx task-studio --help            # Show help
+npx task-studio -p 3000           # Use custom port (default: 5565)
+npx task-studio --ws-port 3001    # Use custom WebSocket port (default: 5566)
+npx task-studio --ws-url ws://example.com:8080  # Use external WebSocket URL
+npx task-studio -d path/to/.taskmaster  # Custom .taskmaster directory
+npx task-studio --no-open         # Don't open browser automatically
 ```
 
 ## How it works
@@ -82,7 +92,7 @@ The UI uses WebSocket and file watchers to detect changes to:
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/), [Tanstack Query](https://tanstack.com/query/latest)
 - **Icons**: [Lucide](https://lucide.dev/)
 
-### Commands
+### Development Commands
 
 ```bash
 pnpm dev          # Start development server (port 5565) + WebSocket (port 5566)

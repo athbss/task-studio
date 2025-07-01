@@ -1,9 +1,9 @@
-# Task UI - Issue Viewer Modal PRD
+# Task Studio - Issue Viewer Modal PRD
 
 <context>
 # Overview
 
-The Issue Viewer Modal is a read-only overlay component that displays complete task details when users click on any task in the Task UI interface. This feature enhances the task browsing experience by providing instant access to full task information without navigating away from the current view, maintaining context and improving workflow efficiency.
+The Issue Viewer Modal is a read-only overlay component that displays complete task details when users click on any task in the Task Studio interface. This feature enhances the task browsing experience by providing instant access to full task information without navigating away from the current view, maintaining context and improving workflow efficiency.
 
 ## Project Context
 

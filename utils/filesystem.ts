@@ -55,6 +55,16 @@ export function validateTaskmasterPath(inputPath: string): boolean {
          return false;
       }
 
+      // Special case for npx/npm temporary directories
+      // When running via npx, files might be in node_modules
+      if (
+         normalizedPath.includes('node_modules') &&
+         (normalizedPath.includes('task-studio') || normalizedPath.includes('/.npm/_npx/'))
+      ) {
+         // Allow these paths - they're from npx execution
+         return true;
+      }
+
       // For absolute paths, ensure they contain .taskmaster
       if (path.isAbsolute(normalizedPath)) {
          if (!normalizedPath.includes(TASKMASTER_DIR)) {
@@ -315,14 +325,20 @@ export async function writeJsonFile<T = any>(
       const tempPath = `${filePath}.${crypto.randomBytes(6).toString('hex')}.tmp`;
 
       try {
+         // Ensure the directory exists
+         const dir = path.dirname(filePath);
+         if (!existsSync(dir)) {
+            await fs.mkdir(dir, { recursive: true });
+         }
+
          // Serialize the data
          const jsonString = options?.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
 
          // Write to temporary file first
-         writeFileSync(tempPath, jsonString, 'utf-8');
+         await fs.writeFile(tempPath, jsonString, 'utf-8');
 
          // Atomically rename the temp file to the target file
-         renameSync(tempPath, filePath);
+         await fs.rename(tempPath, filePath);
 
          return {
             success: true,

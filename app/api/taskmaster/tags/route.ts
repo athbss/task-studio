@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
 import { readJsonFile } from '@/utils/filesystem';
 import { TaskmasterPaths } from '@/lib/taskmaster-paths';
 

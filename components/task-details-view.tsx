@@ -407,6 +407,7 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                                        <StatusSelector
                                           status={subtaskStatusObject}
                                           taskId={subtaskId}
+                                          tagName={tagName}
                                        />
                                     </div>
                                     <span className={cn('flex-1 text-sm font-medium')}>
@@ -564,6 +565,7 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                                        <StatusSelector
                                           status={depStatusObject}
                                           taskId={depTaskId}
+                                          tagName={tagName}
                                        />
                                     </div>
                                     <span className={cn('flex-1 text-sm font-medium')}>
@@ -607,17 +609,32 @@ export function TaskDetailsView({ task }: TaskDetailsViewProps) {
                <div className="space-y-1">
                   {/* Status */}
                   <div className="flex items-center py-2">
-                     <StatusSelector status={statusObject} taskId={taskId} showLabel />
+                     <StatusSelector
+                        status={statusObject}
+                        taskId={taskId}
+                        tagName={tagName}
+                        showLabel
+                     />
                   </div>
 
                   {/* Priority */}
                   <div className="flex items-center py-2">
-                     <PrioritySelector priority={priorityObject} taskId={taskId} showLabel />
+                     <PrioritySelector
+                        priority={priorityObject}
+                        taskId={taskId}
+                        tagName={tagName}
+                        showLabel
+                     />
                   </div>
 
                   {/* Assignee */}
                   <div className="flex items-center py-2">
-                     <AssigneeSelector user={assigneeUser} taskId={taskId} showLabel />
+                     <AssigneeSelector
+                        user={assigneeUser}
+                        taskId={taskId}
+                        tagName={tagName}
+                        showLabel
+                     />
                   </div>
 
                   {/* Estimate / Complexity Score */}

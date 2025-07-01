@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Taskmaster UPDATE API enables users to modify task fields directly from the web UI, providing a seamless way to update task status, priority, and assignee without needing to use the CLI. This feature transforms the Task UI UI from a read-only viewer into an interactive task management interface, similar to how Prisma Studio allows database modifications through a web interface.
+The Taskmaster UPDATE API enables users to modify task fields directly from the web UI, providing a seamless way to update task status, priority, and assignee without needing to use the CLI. This feature transforms the Task Studio UI from a read-only viewer into an interactive task management interface, similar to how Prisma Studio allows database modifications through a web interface.
 
 The UPDATE API focuses exclusively on fields that are already displayed and editable in the UI, maintaining a clean separation between CLI-managed task structure and UI-managed task state.
 
@@ -87,7 +87,7 @@ The UPDATE API focuses exclusively on fields that are already displayed and edit
 
 ### User Personas
 
-1. **Local Developer**: Uses Task UI as a visual interface for their .taskmaster tasks, similar to using Prisma Studio for database management.
+1. **Local Developer**: Uses Task Studio as a visual interface for their .taskmaster tasks, similar to using Prisma Studio for database management.
 
 2. **Project Manager**: Reviews task progress visually and updates status/priority without needing CLI knowledge.
 

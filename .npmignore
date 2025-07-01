@@ -1,0 +1,51 @@
+# Development files
+.env*
+.vscode/
+.cursor/
+.idea/
+*.log
+node_modules/
+
+# Source files (only ship built files)
+app/
+components/
+hooks/
+utils/
+styles/
+*.ts
+*.tsx
+!lib/**/*.ts
+!scripts/ws.ts
+
+# Build artifacts we don't need
+.next/cache/
+.next/server/app-paths-manifest.json
+.next/server/middleware-manifest.json
+.next/server/pages-manifest.json
+.next/server/webpack-runtime.js
+.next/build-manifest.json
+.next/react-loadable-manifest.json
+.next/trace
+*.map
+
+# Test files
+__tests__/
+*.test.*
+*.spec.*
+
+# Documentation
+README.md
+CLAUDE.md
+docs/
+
+# Git files
+.git/
+.gitignore
+
+# Config files (except necessary ones)
+.eslintrc.json
+.prettierrc
+tsconfig.json
+tailwind.config.ts
+postcss.config.mjs
+next-env.d.ts

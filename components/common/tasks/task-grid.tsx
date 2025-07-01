@@ -130,12 +130,16 @@ export function TaskGrid({ task, showTagBadge = true }: TaskGridProps) {
             >
                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
-                     <PrioritySelector priority={task.priority} taskId={task.id} />
+                     <PrioritySelector
+                        priority={task.priority}
+                        taskId={task.id}
+                        tagName={task.tag?.id}
+                     />
                      <span className="text-xs text-muted-foreground font-medium">
                         {task.identifier}
                      </span>
                   </div>
-                  <StatusSelector status={task.status} taskId={task.id} />
+                  <StatusSelector status={task.status} taskId={task.id} tagName={task.tag?.id} />
                </div>
                <h3 className="text-sm font-semibold mb-3 line-clamp-2">{task.title}</h3>
                <div className="flex flex-wrap gap-1.5 mb-3 min-h-[1.5rem]">

@@ -222,7 +222,8 @@
       "metadata": {
          "created": "2025-06-29T11:25:40.187Z",
          "updated": "2025-06-29T12:05:56.791Z",
-         "description": "Tasks for taskmaster-circle-ui context"
+         "description": "Tasks for taskmaster-circle-ui context",
+         "updatedAt": "2025-07-01T17:02:56.993Z"
       }
    },
    "task-viewer": {
@@ -233,7 +234,7 @@
             "description": "Set up dedicated Zustand store for managing issue viewer modal state including open/close state and selected task ID",
             "details": "Create src/stores/useIssueViewStore.ts with IssueViewState interface. Include selectedIssueId (string | null), isOpen (boolean), openIssue(issueId: string) action, and closeIssue() action. Use Zustand's create function with proper TypeScript typing. Store should be minimal and focused only on modal state management.",
             "testStrategy": "Manual testing of store actions - verify openIssue sets selectedIssueId and isOpen to true, closeIssue resets selectedIssueId to null and isOpen to false. Test store subscription updates in React components.",
-            "priority": "high",
+            "priority": "urgent",
             "dependencies": [],
             "status": "done",
             "subtasks": []
@@ -330,7 +331,8 @@
       "metadata": {
          "created": "2025-06-29T13:28:30.206Z",
          "updated": "2025-06-30T00:51:37.929Z",
-         "description": "Tasks for task-viewer context"
+         "description": "Tasks for task-viewer context",
+         "updatedAt": "2025-07-01T17:04:33.123Z"
       }
    },
    "taskmaster-update-api": {
@@ -341,7 +343,7 @@
             "description": "Implement atomic file writing utilities for safe JSON file operations",
             "details": "Create `/utils/filesystem.ts` with functions: `writeJsonFile()` for atomic file writing using temporary files, `acquireFileLock()` for simple file locking (last-write-wins approach), and `validateTaskUpdate()` for input validation. Use Node.js `fs` module with `fs.writeFileSync()` to write to temporary file first, then rename to target file for atomicity. Include error handling for file system operations and JSON serialization.",
             "testStrategy": "Test concurrent write operations, verify file integrity after writes, test error scenarios like permission denied and disk full, validate temporary file cleanup on success and failure",
-            "priority": "medium",
+            "priority": "high",
             "dependencies": [],
             "status": "done",
             "subtasks": []
@@ -450,7 +452,7 @@
          "created": "2025-06-30T16:12:43.811Z",
          "updated": "2025-07-01T01:06:23.575Z",
          "description": "Tasks for taskmaster-update-api context",
-         "updatedAt": "2025-07-01T01:27:34.156Z"
+         "updatedAt": "2025-07-01T17:03:04.586Z"
       }
    }
 }

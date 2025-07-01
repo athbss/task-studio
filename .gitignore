@@ -48,3 +48,6 @@ next-env.d.ts
 
 # editors
 .idea/
+
+# task-studio runtime config
+.taskmaster-config.json

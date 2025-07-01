@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import { readJsonFile } from '@/utils/filesystem';
 import fs from 'fs/promises';
+import { TaskmasterPaths } from '@/lib/taskmaster-paths';
 
 interface ComplexityAnalysis {
    taskId: number;
@@ -27,8 +28,8 @@ interface ComplexityReport {
 
 export async function GET() {
    try {
-      // Read tasks.json from the current .taskmaster directory
-      const tasksPath = path.join(process.cwd(), '.taskmaster', 'tasks', 'tasks.json');
+      // Read tasks.json from the .taskmaster directory
+      const tasksPath = TaskmasterPaths.tasks();
 
       const result = await readJsonFile(tasksPath);
 
@@ -45,7 +46,7 @@ export async function GET() {
       }
 
       // Read all complexity reports
-      const reportsPath = path.join(process.cwd(), '.taskmaster', 'reports');
+      const reportsPath = TaskmasterPaths.reports();
       const complexityReports: Record<string, Record<number, ComplexityAnalysis>> = {};
 
       try {

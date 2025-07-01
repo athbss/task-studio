@@ -22,10 +22,16 @@ import { extractTaskId } from '@/lib/format-task-id';
 interface StatusSelectorProps {
    status: Status;
    taskId: string;
+   tagName?: string;
    showLabel?: boolean;
 }
 
-export function StatusSelector({ status, taskId, showLabel = false }: StatusSelectorProps) {
+export function StatusSelector({
+   status,
+   taskId,
+   tagName,
+   showLabel = false,
+}: StatusSelectorProps) {
    const id = useId();
    const [open, setOpen] = useState<boolean>(false);
    const [value, setValue] = useState<string>(status.id);
@@ -34,6 +40,9 @@ export function StatusSelector({ status, taskId, showLabel = false }: StatusSele
    const updateTaskMutation = useUpdateTask();
    const { data: currentTagData } = useCurrentTag();
    const currentTag = currentTagData?.currentTag || 'master';
+
+   // Use the provided tagName or fall back to currentTag
+   const taskTag = tagName || currentTag;
 
    useEffect(() => {
       setValue(status.id);
@@ -54,7 +63,7 @@ export function StatusSelector({ status, taskId, showLabel = false }: StatusSele
 
             // Trigger the API update
             updateTaskMutation.mutate({
-               tag: currentTag,
+               tag: taskTag,
                taskId: numericTaskId,
                updates: {
                   status: statusId as TaskStatus,

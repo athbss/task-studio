@@ -21,10 +21,16 @@ import { extractTaskId } from '@/lib/format-task-id';
 interface AssigneeSelectorProps {
    user: User | null;
    taskId: string;
+   tagName?: string;
    showLabel?: boolean;
 }
 
-export function AssigneeSelector({ user, taskId, showLabel = true }: AssigneeSelectorProps) {
+export function AssigneeSelector({
+   user,
+   taskId,
+   tagName,
+   showLabel = true,
+}: AssigneeSelectorProps) {
    const id = useId();
    const [open, setOpen] = useState<boolean>(false);
    const [value, setValue] = useState<string | null>(user?.id || null);
@@ -33,6 +39,9 @@ export function AssigneeSelector({ user, taskId, showLabel = true }: AssigneeSel
    const updateTaskMutation = useUpdateTask();
    const { data: currentTagData } = useCurrentTag();
    const currentTag = currentTagData?.currentTag || 'master';
+
+   // Use the provided tagName or fall back to currentTag
+   const taskTag = tagName || currentTag;
 
    useEffect(() => {
       setValue(user?.id || null);
@@ -53,7 +62,7 @@ export function AssigneeSelector({ user, taskId, showLabel = true }: AssigneeSel
 
             // Trigger the API update
             updateTaskMutation.mutate({
-               tag: currentTag,
+               tag: taskTag,
                taskId: numericTaskId,
                updates: {
                   assignee: newUser.name, // Using name as assignee identifier

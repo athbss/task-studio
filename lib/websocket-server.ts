@@ -28,8 +28,6 @@ export function createTaskmasterWebSocketServer(port: number = 5566) {
 
    // Broadcast changes to all connected clients
    watcher.on('change', (filepath) => {
-      console.log(`File changed: ${filepath}`);
-
       // Clear existing timer
       if (debounceTimer) {
          clearTimeout(debounceTimer);

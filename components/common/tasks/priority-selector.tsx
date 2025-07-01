@@ -21,10 +21,16 @@ import { extractTaskId } from '@/lib/format-task-id';
 interface PrioritySelectorProps {
    priority: Priority;
    taskId?: string;
+   tagName?: string;
    showLabel?: boolean;
 }
 
-export function PrioritySelector({ priority, taskId, showLabel = false }: PrioritySelectorProps) {
+export function PrioritySelector({
+   priority,
+   taskId,
+   tagName,
+   showLabel = false,
+}: PrioritySelectorProps) {
    const id = useId();
    const [open, setOpen] = useState<boolean>(false);
    const [value, setValue] = useState<string>(priority.id);
@@ -33,6 +39,9 @@ export function PrioritySelector({ priority, taskId, showLabel = false }: Priori
    const updateTaskMutation = useUpdateTask();
    const { data: currentTagData } = useCurrentTag();
    const currentTag = currentTagData?.currentTag || 'master';
+
+   // Use the provided tagName or fall back to currentTag
+   const taskTag = tagName || currentTag;
 
    useEffect(() => {
       setValue(priority.id);
@@ -53,7 +62,7 @@ export function PrioritySelector({ priority, taskId, showLabel = false }: Priori
 
             // Trigger the API update
             updateTaskMutation.mutate({
-               tag: currentTag,
+               tag: taskTag,
                taskId: numericTaskId,
                updates: {
                   priority: priorityId as TaskPriority,

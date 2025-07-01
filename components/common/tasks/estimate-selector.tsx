@@ -32,7 +32,7 @@ const estimates = [
    { value: 10, label: '10/10', complexity: 'High' },
 ];
 
-export function EstimateSelector({ estimate, taskId, showLabel = false }: EstimateSelectorProps) {
+export function EstimateSelector({ estimate, showLabel = false }: EstimateSelectorProps) {
    const id = useId();
    const [open, setOpen] = useState<boolean>(false);
    const [value, setValue] = useState<number | undefined>(estimate);
@@ -47,7 +47,6 @@ export function EstimateSelector({ estimate, taskId, showLabel = false }: Estima
       setOpen(false);
 
       // TODO: Call API to update task estimate
-      console.log(`Updating estimate for ${taskId} to ${newEstimate}`);
    };
 
    const selectedEstimate = estimates.find((est) => est.value === value);
