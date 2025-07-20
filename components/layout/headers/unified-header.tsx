@@ -35,6 +35,8 @@ import { Filter } from '@/components/layout/headers/tasks/filter';
 import { useCurrentTagWithTasks, useTags } from '@/hooks/use-taskmaster-queries';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
+import { LanguageSelector } from '@/components/ui/language-selector';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 
 interface HeaderConfig {
    title: string;
@@ -253,165 +255,25 @@ export function UnifiedHeader() {
 
    // Render standard header
    return (
-      <header className="w-full flex flex-col border-b">
-         {/* Header Nav */}
-         <div className="w-full flex justify-between items-center border-b py-1.5 px-6 h-10">
-            {config.showSearch ? (
-               <>
-                  <SidebarTrigger className="" />
-                  <div className="flex items-center gap-2">
-                     {isSearchOpen ? (
-                        <div
-                           ref={searchContainerRef}
-                           className="relative flex items-center justify-center w-64 transition-all duration-200 ease-in-out"
-                        >
-                           <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                           <Input
-                              type="search"
-                              ref={searchInputRef}
-                              value={localSearchValue}
-                              onChange={(e) => {
-                                 previousValueRef.current = localSearchValue;
-                                 const newValue = e.target.value;
-                                 setLocalSearchValue(newValue);
-
-                                 if (previousValueRef.current && newValue === '') {
-                                    const inputEvent = e.nativeEvent as InputEvent;
-                                    if (
-                                       inputEvent.inputType !== 'deleteContentBackward' &&
-                                       inputEvent.inputType !== 'deleteByCut'
-                                    ) {
-                                       closeSearch();
-                                       setLocalSearchValue('');
-                                    }
-                                 }
-                              }}
-                              placeholder="Search tasks..."
-                              className="pl-8 h-7 text-sm"
-                              onKeyDown={(e) => {
-                                 if (e.key === 'Escape') {
-                                    if (localSearchValue.trim() === '') {
-                                       closeSearch();
-                                       setLocalSearchValue('');
-                                    } else {
-                                       setLocalSearchValue('');
-                                    }
-                                 }
-                              }}
-                           />
-                        </div>
-                     ) : (
-                        <>
-                           <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={toggleSearch}
-                              className="h-8 w-8"
-                              aria-label="Search"
-                           >
-                              <Search className="h-4 w-4" />
-                           </Button>
-                           {/* <Notifications /> */}
-                        </>
-                     )}
-                  </div>
-               </>
-            ) : (
-               <>
-                  <div className="flex items-center gap-2">
-                     <SidebarTrigger className="" />
-                     <div className="flex items-center gap-1">
-                        <span className="text-sm font-medium">{config.title}</span>
-                        {config.showCount && (
-                           <span className="text-xs bg-accent rounded-md px-1.5 py-1">
-                              {pageType === 'tags'
-                                 ? tagsData?.length || 0
-                                 : taskFilter === 'active'
-                                   ? currentTagData.tasks.filter(
-                                        (t) => t.status === 'in-progress' || t.status === 'pending'
-                                     ).length
-                                   : currentTagData.tasks.length}
-                           </span>
-                        )}
-                     </div>
-                     {(pageType === 'tasks' || pageType === 'tag-tasks') && (
-                        <div className="flex items-center gap-1 ml-4">
-                           <Button
-                              variant={taskFilter === 'all' ? 'default' : 'outline'}
-                              size="xs"
-                              onClick={() => setTaskFilter('all')}
-                              className="h-7 px-2"
-                           >
-                              <ListTodo className="h-4 w-4 mr-1" />
-                              All tasks
-                           </Button>
-                           <Button
-                              variant={taskFilter === 'active' ? 'default' : 'outline'}
-                              size="xs"
-                              onClick={() => setTaskFilter('active')}
-                              className="h-7 px-2"
-                           >
-                              <CircleDashed className="h-4 w-4 mr-1" />
-                              Active
-                           </Button>
-                        </div>
-                     )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                     {config.actionButton && (
-                        <Button
-                           className="relative"
-                           size="xs"
-                           variant="secondary"
-                           onClick={config.actionButton.onClick}
-                        >
-                           <config.actionButton.icon className="size-4" />
-                           <span className="hidden sm:inline ml-1">
-                              {config.actionButton.label}
-                           </span>
-                        </Button>
-                     )}
-                  </div>
-               </>
-            )}
-         </div>
-
-         {/* Header Options */}
-         {config.showOptions && (
-            <div className="w-full flex justify-between items-center py-1.5 px-6 h-10">
-               <Filter />
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button className="relative" size="xs" variant="secondary">
-                        <SlidersHorizontal className="size-4 mr-1" />
-                        Display
-                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-72 flex p-3 gap-2" align="end">
-                     <DropdownMenuItem
-                        onClick={() => setViewType('list')}
-                        className={cn(
-                           'w-full text-xs border border-accent flex flex-col gap-1',
-                           viewType === 'list' ? 'bg-accent' : ''
-                        )}
-                     >
-                        <LayoutList className="size-4" />
-                        List
-                     </DropdownMenuItem>
-                     <DropdownMenuItem
-                        onClick={() => setViewType('board')}
-                        className={cn(
-                           'w-full text-xs border border-accent flex flex-col gap-1',
-                           viewType === 'board' ? 'bg-accent' : ''
-                        )}
-                     >
-                        <LayoutGrid className="size-4" />
-                        Board
-                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-               </DropdownMenu>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+         <div className="container flex h-14 items-center">
+            <div className="mr-4 hidden md:flex">
+               <a className="mr-6 flex items-center space-x-2" href="/">
+                  <span className="hidden font-bold sm:inline-block">
+                     Task Studio
+                  </span>
+               </a>
             </div>
-         )}
+            <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+               <div className="w-full flex-1 md:w-auto md:flex-none">
+                  {/* Add search or other controls here */}
+               </div>
+               <nav className="flex items-center space-x-2">
+                  <LanguageSelector />
+                  <ThemeToggle />
+               </nav>
+            </div>
+         </div>
       </header>
    );
 }

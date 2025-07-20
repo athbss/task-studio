@@ -41,6 +41,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { NuqsProvider } from '@/components/providers/nuqs-provider';
 import { TaskmasterWebSocketProvider } from '@/components/providers/taskmaster-websocket-provider';
+import { I18nProvider } from '@/components/providers/i18n-provider';
 
 import { Suspense } from 'react';
 
@@ -50,21 +51,23 @@ export default function RootLayout({
    children: React.ReactNode;
 }>) {
    return (
-      <html lang="en" suppressHydrationWarning>
+      <html lang="he" suppressHydrationWarning>
          <head>
             <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
          </head>
          <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}>
-            <NuqsProvider>
-               <QueryProvider>
-                  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-                     <Suspense fallback={null}>
-                        <TaskmasterWebSocketProvider>{children}</TaskmasterWebSocketProvider>
-                     </Suspense>
-                     <Toaster />
-                  </ThemeProvider>
-               </QueryProvider>
-            </NuqsProvider>
+            <I18nProvider>
+               <NuqsProvider>
+                  <QueryProvider>
+                     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+                        <Suspense fallback={null}>
+                           <TaskmasterWebSocketProvider>{children}</TaskmasterWebSocketProvider>
+                        </Suspense>
+                        <Toaster />
+                     </ThemeProvider>
+                  </QueryProvider>
+               </NuqsProvider>
+            </I18nProvider>
          </body>
       </html>
    );
